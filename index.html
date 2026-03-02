@@ -1,0 +1,596 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Carte de Mise Roulette</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <!-- OVERLAY SOMBRE POUR MENU -->
+    <div class="overlay" id="overlay"></div>
+
+    <!-- COLONNE GAUCHE — HISTORIQUE -->
+    <section class="historique" id="historique">
+      <h2>Historique</h2>
+
+      <div class="historique-entry">
+        <span class="historique-id">#307460</span>
+        <svg class="boule" viewBox="0 0 40 40">
+          <circle
+            cx="20"
+            cy="20"
+            r="18"
+            fill="#111111"
+            stroke="#333"
+            stroke-width="1"
+          />
+          <text
+            x="20"
+            y="25"
+            text-anchor="middle"
+            fill="white"
+            font-size="14"
+            font-weight="bold"
+          >
+            1
+          </text>
+        </svg>
+      </div>
+
+      <div class="historique-entry">
+        <span class="historique-id">#307461</span>
+        <svg class="boule" viewBox="0 0 40 40">
+          <circle
+            cx="20"
+            cy="20"
+            r="18"
+            fill="#CC0000"
+            stroke="#990000"
+            stroke-width="1"
+          />
+          <text
+            x="20"
+            y="25"
+            text-anchor="middle"
+            fill="white"
+            font-size="14"
+            font-weight="bold"
+          >
+            2
+          </text>
+        </svg>
+      </div>
+
+      <div class="historique-entry">
+        <span class="historique-id">#307462</span>
+        <svg class="boule" viewBox="0 0 40 40">
+          <circle
+            cx="20"
+            cy="20"
+            r="18"
+            fill="#111111"
+            stroke="#333"
+            stroke-width="1"
+          />
+          <text
+            x="20"
+            y="25"
+            text-anchor="middle"
+            fill="white"
+            font-size="14"
+            font-weight="bold"
+          >
+            3
+          </text>
+        </svg>
+      </div>
+
+      <div class="historique-entry">
+        <span class="historique-id">#307463</span>
+        <svg class="boule" viewBox="0 0 40 40">
+          <circle
+            cx="20"
+            cy="20"
+            r="18"
+            fill="#CC0000"
+            stroke="#990000"
+            stroke-width="1"
+          />
+          <text
+            x="20"
+            y="25"
+            text-anchor="middle"
+            fill="white"
+            font-size="14"
+            font-weight="bold"
+          >
+            4
+          </text>
+        </svg>
+      </div>
+
+      <div class="historique-entry">
+        <span class="historique-id">#307464</span>
+        <svg class="boule" viewBox="0 0 40 40">
+          <circle
+            cx="20"
+            cy="20"
+            r="18"
+            fill="#DAA520"
+            stroke="#B8860B"
+            stroke-width="1"
+          />
+        </svg>
+      </div>
+
+      <div class="historique-entry">
+        <span class="historique-id">#307465</span>
+        <svg class="boule" viewBox="0 0 40 40">
+          <circle
+            cx="20"
+            cy="20"
+            r="18"
+            fill="#111111"
+            stroke="#333"
+            stroke-width="1"
+          />
+          <text
+            x="20"
+            y="25"
+            text-anchor="middle"
+            fill="white"
+            font-size="14"
+            font-weight="bold"
+          >
+            6
+          </text>
+        </svg>
+      </div>
+
+      <div class="historique-entry">
+        <span class="historique-id">#307466</span>
+        <svg class="boule" viewBox="0 0 40 40">
+          <circle
+            cx="20"
+            cy="20"
+            r="18"
+            fill="#CC0000"
+            stroke="#990000"
+            stroke-width="1"
+          />
+          <text
+            x="20"
+            y="25"
+            text-anchor="middle"
+            fill="white"
+            font-size="14"
+            font-weight="bold"
+          >
+            7
+          </text>
+        </svg>
+      </div>
+
+      <div class="historique-entry">
+        <span class="historique-id">#307467</span>
+        <svg class="boule" viewBox="0 0 40 40">
+          <circle
+            cx="20"
+            cy="20"
+            r="18"
+            fill="#111111"
+            stroke="#333"
+            stroke-width="1"
+          />
+          <text
+            x="20"
+            y="25"
+            text-anchor="middle"
+            fill="white"
+            font-size="14"
+            font-weight="bold"
+          >
+            8
+          </text>
+        </svg>
+      </div>
+
+      <div class="historique-entry">
+        <span class="historique-id">#307468</span>
+        <svg class="boule" viewBox="0 0 40 40">
+          <circle
+            cx="20"
+            cy="20"
+            r="18"
+            fill="#CC0000"
+            stroke="#990000"
+            stroke-width="1"
+          />
+          <text
+            x="20"
+            y="25"
+            text-anchor="middle"
+            fill="white"
+            font-size="14"
+            font-weight="bold"
+          >
+            5
+          </text>
+        </svg>
+      </div>
+    </section>
+
+    <!-- CENTRE — MAIN -->
+    <main>
+      <header class="main-header">
+        <img
+          src="./assets/image/jackpot2.png"
+          alt="Jackpot"
+          class="jackpot-img"
+        />
+      </header>
+
+      <section class="section-middle"></section>
+
+      <section class="section-bottom">
+        <table>
+          <tbody>
+            <!-- Ligne 1 : 7, 8, OVER -->
+            <tr>
+              <td class="cell-boule">
+                <svg class="table-boule" viewBox="0 0 40 40">
+                  <circle
+                    cx="20"
+                    cy="20"
+                    r="18"
+                    fill="#CC0000"
+                    stroke="#990000"
+                    stroke-width="1"
+                  />
+                  <text
+                    x="20"
+                    y="25"
+                    text-anchor="middle"
+                    fill="white"
+                    font-size="14"
+                    font-weight="bold"
+                  >
+                    7
+                  </text>
+                </svg>
+              </td>
+              <td class="cell-boule">
+                <svg class="table-boule" viewBox="0 0 40 40">
+                  <circle
+                    cx="20"
+                    cy="20"
+                    r="18"
+                    fill="#111111"
+                    stroke="#333"
+                    stroke-width="1"
+                  />
+                  <text
+                    x="20"
+                    y="25"
+                    text-anchor="middle"
+                    fill="white"
+                    font-size="14"
+                    font-weight="bold"
+                  >
+                    8
+                  </text>
+                </svg>
+              </td>
+              <td class="cell-text" rowspan="2">OVER</td>
+            </tr>
+            <!-- Ligne 2 : 5, 6 -->
+            <tr>
+              <td class="cell-boule">
+                <svg class="table-boule" viewBox="0 0 40 40">
+                  <circle
+                    cx="20"
+                    cy="20"
+                    r="18"
+                    fill="#CC0000"
+                    stroke="#990000"
+                    stroke-width="1"
+                  />
+                  <text
+                    x="20"
+                    y="25"
+                    text-anchor="middle"
+                    fill="white"
+                    font-size="14"
+                    font-weight="bold"
+                  >
+                    5
+                  </text>
+                </svg>
+              </td>
+              <td class="cell-boule">
+                <svg class="table-boule" viewBox="0 0 40 40">
+                  <circle
+                    cx="20"
+                    cy="20"
+                    r="18"
+                    fill="#111111"
+                    stroke="#333"
+                    stroke-width="1"
+                  />
+                  <text
+                    x="20"
+                    y="25"
+                    text-anchor="middle"
+                    fill="white"
+                    font-size="14"
+                    font-weight="bold"
+                  >
+                    6
+                  </text>
+                </svg>
+              </td>
+            </tr>
+            <!-- Ligne 3 : Grand losange jaune (rowspan=2, colspan=2) + losange rouge -->
+            <tr>
+              <td class="cell-losange-container" rowspan="2" colspan="2">
+                <div class="losange losange-jaune"></div>
+              </td>
+              <td class="cell-losange-container">
+                <div class="losange losange-rouge"></div>
+              </td>
+            </tr>
+            <!-- Ligne 4 : losange gris-noir -->
+            <tr>
+              <td class="cell-losange-container">
+                <div class="losange losange-gris"></div>
+              </td>
+            </tr>
+            <!-- Ligne 5 : 3, 4, UNDER -->
+            <tr>
+              <td class="cell-boule">
+                <svg class="table-boule" viewBox="0 0 40 40">
+                  <circle
+                    cx="20"
+                    cy="20"
+                    r="18"
+                    fill="#111111"
+                    stroke="#333"
+                    stroke-width="1"
+                  />
+                  <text
+                    x="20"
+                    y="25"
+                    text-anchor="middle"
+                    fill="white"
+                    font-size="14"
+                    font-weight="bold"
+                  >
+                    3
+                  </text>
+                </svg>
+              </td>
+              <td class="cell-boule">
+                <svg class="table-boule" viewBox="0 0 40 40">
+                  <circle
+                    cx="20"
+                    cy="20"
+                    r="18"
+                    fill="#CC0000"
+                    stroke="#990000"
+                    stroke-width="1"
+                  />
+                  <text
+                    x="20"
+                    y="25"
+                    text-anchor="middle"
+                    fill="white"
+                    font-size="14"
+                    font-weight="bold"
+                  >
+                    4
+                  </text>
+                </svg>
+              </td>
+              <td class="cell-text" rowspan="2">UNDER</td>
+            </tr>
+            <!-- Ligne 6 : 1, 2 -->
+            <tr>
+              <td class="cell-boule">
+                <svg class="table-boule" viewBox="0 0 40 40">
+                  <circle
+                    cx="20"
+                    cy="20"
+                    r="18"
+                    fill="#111111"
+                    stroke="#333"
+                    stroke-width="1"
+                  />
+                  <text
+                    x="20"
+                    y="25"
+                    text-anchor="middle"
+                    fill="white"
+                    font-size="14"
+                    font-weight="bold"
+                  >
+                    1
+                  </text>
+                </svg>
+              </td>
+              <td class="cell-boule">
+                <svg class="table-boule" viewBox="0 0 40 40">
+                  <circle
+                    cx="20"
+                    cy="20"
+                    r="18"
+                    fill="#CC0000"
+                    stroke="#990000"
+                    stroke-width="1"
+                  />
+                  <text
+                    x="20"
+                    y="25"
+                    text-anchor="middle"
+                    fill="white"
+                    font-size="14"
+                    font-weight="bold"
+                  >
+                    2
+                  </text>
+                </svg>
+              </td>
+            </tr>
+            <!-- Ligne 7 : Impair, Pair -->
+            <tr>
+              <td class="cell-text">Impair</td>
+              <td class="cell-text">Pair</td>
+              <td></td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+    </main>
+
+    <!-- HAMBURGER ICON -->
+    <button class="hamburger" id="hamburger" aria-label="Ouvrir le menu">
+      <span class="hamburger-line"></span>
+      <span class="hamburger-line"></span>
+      <span class="hamburger-line"></span>
+    </button>
+
+    <!-- SIDEBAR MENU -->
+    <nav class="sidebar" id="sidebar">
+      <button
+        class="sidebar-close"
+        id="sidebarClose"
+        aria-label="Fermer le menu"
+      >
+        &times;
+      </button>
+
+      <div class="sidebar-item">
+        <h3>Créer un compte</h3>
+        <p>Profitez des bonus de bienvenue</p>
+      </div>
+      <div class="sidebar-item">
+        <h3>Se connecter</h3>
+        <p>Retrouvez vos mises et historiques</p>
+      </div>
+      <div class="sidebar-item">
+        <h3>Tableau de bord</h3>
+        <p>Solde, limites et préférences</p>
+      </div>
+      <div class="sidebar-item">
+        <h3>Paramètres</h3>
+        <p>Thème et options</p>
+      </div>
+      <div class="sidebar-item">
+        <h3>Support VIP</h3>
+        <p>Chat 24/7 avec un croupier</p>
+      </div>
+      <div class="sidebar-item">
+        <h3>Règles &amp; responsable</h3>
+        <p>Conseils pour miser en sécurité</p>
+      </div>
+      <div class="sidebar-item">
+        <h3>Test de connexion API</h3>
+        <p>Vérifier la connexion au backend</p>
+      </div>
+    </nav>
+
+    <!-- FOOTER — BARRE JETONS -->
+    <footer class="footer" id="footer">
+      <button class="footer-btn footer-trash" title="Effacer toutes les mises">
+        <svg
+          viewBox="0 0 24 24"
+          width="28"
+          height="28"
+          fill="none"
+          stroke="white"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <polyline points="3 6 5 6 21 6"></polyline>
+          <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path>
+          <path d="M10 11v6"></path>
+          <path d="M14 11v6"></path>
+          <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"></path>
+        </svg>
+      </button>
+
+      <div class="jetons-container" id="jetonsContainer">
+        <img
+          class="jeton"
+          src="./assets/image/jeton00050.png"
+          alt="50"
+          data-value="50"
+        />
+        <img
+          class="jeton"
+          src="./assets/image/jeton00100.png"
+          alt="100"
+          data-value="100"
+        />
+        <img
+          class="jeton"
+          src="./assets/image/jeton00200.png"
+          alt="200"
+          data-value="200"
+        />
+        <img
+          class="jeton"
+          src="./assets/image/jeton00500.png"
+          alt="500"
+          data-value="500"
+        />
+        <img
+          class="jeton"
+          src="./assets/image/jeton01000.png"
+          alt="1000"
+          data-value="1000"
+        />
+        <img
+          class="jeton"
+          src="./assets/image/jeton02000.png"
+          alt="2000"
+          data-value="2000"
+        />
+        <img
+          class="jeton"
+          src="./assets/image/jeton05000.png"
+          alt="5000"
+          data-value="5000"
+        />
+        <img
+          class="jeton"
+          src="./assets/image/jeton10000.png"
+          alt="10000"
+          data-value="10000"
+        />
+      </div>
+
+      <button
+        class="footer-btn footer-undo"
+        title="Répéter les mises précédentes"
+      >
+        <svg
+          viewBox="0 0 24 24"
+          width="28"
+          height="28"
+          fill="none"
+          stroke="white"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M3 10h13a4 4 0 0 1 0 8H7"></path>
+          <polyline points="7 6 3 10 7 14"></polyline>
+        </svg>
+      </button>
+    </footer>
+
+    <script src="index.js"></script>
+  </body>
+</html>
