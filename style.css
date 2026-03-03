@@ -9,22 +9,18 @@
   box-sizing: border-box;
 }
 
-html,
-body {
-  height: 100%;
-  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-  background: #1a1a0a;
-  color: #fff;
+html {
   overflow-x: hidden;
+  overflow-y: auto;
+  scroll-behavior: smooth;
 }
 
-/* ========================================
-   LAYOUT — 3 ZONES
-   ======================================== */
 body {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  background: #003d1e;
+  color: #fff;
   display: flex;
   flex-direction: row;
-  min-height: 100vh;
 }
 
 /* ========================================
@@ -35,12 +31,12 @@ body {
   min-width: 160px;
   max-width: 200px;
   height: 100vh;
-  background: #8b6e38;
-  overflow-y: auto;
-  padding: 12px 10px;
-  flex-shrink: 0;
   position: sticky;
   top: 0;
+  background: #003d1e;
+  overflow-y: auto;
+  padding: 12px 6px;
+  flex-shrink: 0;
 }
 
 .historique h2 {
@@ -54,11 +50,13 @@ body {
   color: #fff;
 }
 
+/* Chaque entrée : colonne verticale (ID en haut, boule en bas) */
 .historique-entry {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 10px;
-  padding: 6px 4px;
+  gap: 4px;
+  padding: 8px 4px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.12);
   transition: background 0.2s;
 }
@@ -67,29 +65,28 @@ body {
   background: rgba(255, 255, 255, 0.08);
 }
 
+/* ID au-dessus de la boule */
 .historique-id {
-  font-size: 0.72rem;
+  font-size: 0.68rem;
   color: #ffe6b3;
   font-family: "Courier New", monospace;
-  min-width: 68px;
+  text-align: center;
 }
 
+/* Boules grosses */
 .boule {
-  width: 30px;
-  height: 30px;
+  width: 50px;
+  height: 50px;
   flex-shrink: 0;
-  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.5));
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.6));
 }
 
-/* Scrollbar historique */
 .historique::-webkit-scrollbar {
   width: 5px;
 }
-
 .historique::-webkit-scrollbar-track {
   background: rgba(0, 0, 0, 0.2);
 }
-
 .historique::-webkit-scrollbar-thumb {
   background: rgba(255, 255, 255, 0.25);
   border-radius: 10px;
@@ -102,12 +99,11 @@ main {
   flex: 1;
   max-width: 450px;
   margin: 0 auto;
-  background: #412f01;
+  background: #006732;
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding-bottom: 90px; /* footer clearance */
-  min-height: 100vh;
+  padding-bottom: 100px;
 }
 
 .main-header {
@@ -119,35 +115,74 @@ main {
 .jackpot-img {
   max-width: 100%;
   height: auto;
-  max-height: 200px;
   filter: drop-shadow(0 0 12px rgba(255, 200, 50, 0.5));
 }
 
+/* ========================================
+   SECTION MIDDLE — Background + Logo
+   ======================================== */
 .section-middle {
   width: 100%;
-  min-height: 40px;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+}
+
+.middle-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+  user-select: none;
+  z-index: 1;
+}
+
+.middle-logo {
+  position: relative;
+  z-index: 2;
+  width: 55%;
+  /* max-width: 220px; */
+  /* height: auto; */
+  object-fit: contain;
+  filter: drop-shadow(0 4px 15px rgba(0, 0, 0, 0.7));
+  pointer-events: none;
+  user-select: none;
+  margin-top: 60px;
 }
 
 /* ========================================
-   SECTION BOTTOM — TABLEAU DE MISE
+   SECTION BOTTOM — DOUBLE BORDURE
    ======================================== */
 .section-bottom {
-  width: 95%;
-  border: 2px solid white;
-  border-radius: 12px;
-  overflow: hidden;
-  margin-top: 10px;
+  width: calc(100% - 32px);
+  margin: 10px 16px 20px 16px;
+  border: 2px solid #ffffff;
+  border-radius: 14px;
+  padding: 6px;
+  background: #412f01;
 }
 
-.section-bottom table {
+.table-outer-border {
+  border: 2px solid #ffffff;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.table-outer-border table {
   width: 100%;
   border-collapse: collapse;
-  border: 2px solid white;
+  table-layout: fixed;
 }
 
-.section-bottom td,
-.section-bottom th {
-  border: 1px solid white;
+.table-outer-border td,
+.table-outer-border th {
+  border: 1px solid #ffffff;
   text-align: center;
   vertical-align: middle;
   padding: 8px 4px;
@@ -155,35 +190,56 @@ main {
   transition: background 0.15s;
 }
 
-.section-bottom td:hover,
-.section-bottom th:hover {
-  background: rgba(255, 255, 255, 0.08);
+.table-outer-border td:hover,
+.table-outer-border th:hover {
+  filter: brightness(1.2);
 }
 
-/* Boules dans le tableau */
-.cell-boule {
-  padding: 6px;
+/* ========================================
+   CASES CHIFFRES
+   ======================================== */
+.cell-num {
+  color: #ffffff;
+  font-size: 1.6rem;
+  font-weight: 800;
+  height: 60px;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
 }
 
-.table-boule {
-  width: 44px;
-  height: 44px;
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.6));
-  transition: transform 0.15s;
+.cell-rouge {
+  background: #cd0001;
 }
 
-.table-boule:hover {
-  transform: scale(1.12);
+.cell-noir {
+  background: #000101;
 }
 
-/* Cellules texte */
+/* ========================================
+   CELLULES TEXTE
+   ======================================== */
 .cell-text {
   font-size: 0.95rem;
   font-weight: 700;
-  letter-spacing: 1px;
+  letter-spacing: 2px;
   text-transform: uppercase;
   color: #fff;
   background: rgba(255, 255, 255, 0.04);
+  line-height: 1.3;
+  padding: 10px 6px;
+}
+
+.table-outer-border table tr:last-child td {
+  padding: 14px 6px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  background: #003d1e;
+  height: 50px;
+}
+
+.cell-empty {
+  background: transparent !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
 }
 
 /* ========================================
@@ -192,6 +248,7 @@ main {
 .cell-losange-container {
   padding: 14px 6px;
   position: relative;
+  background: #003d1e;
 }
 
 .losange {
@@ -210,28 +267,47 @@ main {
   filter: brightness(1.25);
 }
 
-/* Grand losange jaune */
-.cell-losange-container[rowspan="2"][colspan="2"] .losange {
-  width: 100px;
-  height: 100px;
-}
-
+/* Grand losange jaune — vertical normal */
 .losange-jaune {
-  background: #2b2000;
-  border: none;
-  box-shadow: inset 0 0 20px rgba(218, 165, 32, 0.4);
+  background: #ffd36a;
   width: 100px;
   height: 100px;
 }
 
+/* Losange rouge */
 .losange-rouge {
-  background: #a08348;
-  box-shadow: inset 0 0 15px rgba(204, 0, 0, 0.3);
+  background: #fd0000;
 }
 
+/* Losange gris-noir */
 .losange-gris {
-  background: #a08348;
-  box-shadow: inset 0 0 15px rgba(50, 50, 50, 0.5);
+  background: #2a2b2b;
+}
+
+/* ========================================
+   LOSANGES PLATS — Inclinés à l'horizontale
+   ========================================
+   Le losange garde son clip-path normal,
+   mais on l'écrase verticalement pour le rendre plat/horizontal.
+   
+   Losange normal :       Losange plat :
+       ◇                    ⬦
+      / \                 /      \
+     /   \              /          \
+     \   /              \          /
+      \ /                 \      /
+       ◇                    ⬦
+   ======================================== */
+.losange-plat {
+  /* Écraser la hauteur, élargir la largeur → forme plate horizontale */
+  width: 90px;
+  height: 40px;
+  /* Le clip-path reste identique, mais appliqué sur une forme aplatie */
+  clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+}
+
+.losange-plat:hover {
+  transform: scale(1.12);
 }
 
 /* ========================================
@@ -242,10 +318,10 @@ main {
   top: 16px;
   right: 18px;
   z-index: 1000;
-  background: rgba(65, 47, 1, 0.85);
+  background: #003d1e;
   border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 6px;
-  padding: 10px 10px;
+  padding: 10px;
   cursor: pointer;
   display: flex;
   flex-direction: column;
@@ -268,15 +344,12 @@ main {
     opacity 0.3s;
 }
 
-/* Hamburger animé quand ouvert */
 .hamburger.active .hamburger-line:nth-child(1) {
   transform: translateY(8px) rotate(45deg);
 }
-
 .hamburger.active .hamburger-line:nth-child(2) {
   opacity: 0;
 }
-
 .hamburger.active .hamburger-line:nth-child(3) {
   transform: translateY(-8px) rotate(-45deg);
 }
@@ -291,7 +364,7 @@ main {
   width: 300px;
   max-width: 85vw;
   height: 100vh;
-  background: linear-gradient(180deg, #2b2000 0%, #1a1400 100%);
+  background: #003d1e;
   z-index: 999;
   padding: 60px 20px 30px;
   overflow-y: auto;
@@ -380,7 +453,9 @@ main {
   bottom: 0;
   left: 0;
   width: 100%;
-  background: #0e0f0e;
+  background: rgba(14, 15, 14, 0.8);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(12px); /* Safari */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -422,7 +497,6 @@ main {
   stroke: #6bcfff;
 }
 
-/* Jetons */
 .jetons-container {
   display: flex;
   align-items: center;
@@ -452,7 +526,6 @@ main {
   transform: translateY(-2px) scale(0.94);
 }
 
-/* Animation de sélection du jeton */
 .jeton.selected {
   outline: 3px solid #daa520;
   outline-offset: 2px;
@@ -460,7 +533,6 @@ main {
   filter: drop-shadow(0 6px 14px rgba(255, 200, 50, 0.6));
 }
 
-/* Animation pop au clic */
 @keyframes pop {
   0% {
     transform: scale(1);
@@ -483,11 +555,9 @@ main {
   animation: pop 0.4s ease forwards;
 }
 
-/* Scrollbar jetons */
 .jetons-container::-webkit-scrollbar {
   height: 4px;
 }
-
 .jetons-container::-webkit-scrollbar-thumb {
   background: rgba(255, 255, 255, 0.2);
   border-radius: 4px;
@@ -500,26 +570,38 @@ main {
   .historique {
     width: 140px;
     min-width: 100px;
-    padding: 8px 6px;
+    padding: 8px 4px;
   }
-
   .historique-id {
-    font-size: 0.62rem;
-    min-width: 52px;
+    font-size: 0.58rem;
   }
-
   .boule {
-    width: 24px;
-    height: 24px;
+    width: 40px;
+    height: 40px;
   }
-
   main {
     max-width: 100%;
   }
-
   .jeton {
     width: 40px;
     height: 40px;
+  }
+  .middle-logo {
+    width: 50%;
+    max-width: 160px;
+  }
+  .section-bottom {
+    width: calc(100% - 24px);
+    margin: 8px 12px 16px 12px;
+    padding: 5px;
+  }
+  .cell-num {
+    font-size: 1.3rem;
+    height: 50px;
+  }
+  .losange-plat {
+    width: 70px;
+    height: 32px;
   }
 }
 
@@ -528,23 +610,36 @@ main {
     width: 110px;
     min-width: 80px;
   }
-
   .historique h2 {
     font-size: 0.9rem;
   }
-
-  .table-boule {
+  .boule {
     width: 36px;
     height: 36px;
   }
-
+  .middle-logo {
+    width: 45%;
+    max-width: 130px;
+  }
+  .section-bottom {
+    width: calc(100% - 16px);
+    margin: 6px 8px 14px 8px;
+    padding: 4px;
+  }
+  .cell-num {
+    font-size: 1.1rem;
+    height: 44px;
+  }
   .losange {
     width: 55px;
     height: 55px;
   }
-
   .losange-jaune {
     width: 80px;
     height: 80px;
+  }
+  .losange-plat {
+    width: 60px;
+    height: 28px;
   }
 }
