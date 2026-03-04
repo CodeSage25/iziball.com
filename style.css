@@ -37,6 +37,8 @@ body {
   overflow-y: auto;
   padding: 12px 6px;
   flex-shrink: 0;
+  /* Bordure droite légère pour séparer */
+  border-right: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .historique h2 {
@@ -48,6 +50,14 @@ body {
   letter-spacing: 1px;
   text-transform: uppercase;
   color: #fff;
+}
+
+/* Gestion Texte vs Emoji */
+.mobile-text {
+  display: none;
+}
+.desktop-text {
+  display: inline;
 }
 
 /* Chaque entrée : colonne verticale (ID en haut, boule en bas) */
@@ -286,17 +296,6 @@ main {
 
 /* ========================================
    LOSANGES PLATS — Inclinés à l'horizontale
-   ========================================
-   Le losange garde son clip-path normal,
-   mais on l'écrase verticalement pour le rendre plat/horizontal.
-   
-   Losange normal :       Losange plat :
-       ◇                    ⬦
-      / \                 /      \
-     /   \              /          \
-     \   /              \          /
-      \ /                 \      /
-       ◇                    ⬦
    ======================================== */
 .losange-plat {
   /* Écraser la hauteur, élargir la largeur → forme plate horizontale */
@@ -564,82 +563,100 @@ main {
 }
 
 /* ========================================
-   RESPONSIVE
+   RESPONSIVE (Modifications Majeures Mobile)
    ======================================== */
 @media (max-width: 700px) {
+  /* --- 1. HISTORIQUE TRÈS MINCE --- */
   .historique {
-    width: 140px;
-    min-width: 100px;
-    padding: 8px 4px;
+    width: 50px; /* Très mince */
+    min-width: 50px;
+    padding: 10px 2px;
   }
+
+  /* Masquer le texte "Historique" et afficher l'Emoji */
+  .desktop-text {
+    display: none;
+  }
+  .mobile-text {
+    display: block;
+    font-size: 1.5rem; /* Taille de l'émoji */
+  }
+
+  /* Réduire la taille des ID et des boules */
   .historique-id {
-    font-size: 0.58rem;
-  }
-  .boule {
-    width: 40px;
-    height: 40px;
-  }
-  main {
+    font-size: 0.5rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
     max-width: 100%;
   }
-  .jeton {
-    width: 40px;
-    height: 40px;
-  }
-  .middle-logo {
-    width: 50%;
-    max-width: 160px;
-  }
-  .section-bottom {
-    width: calc(100% - 24px);
-    margin: 8px 12px 16px 12px;
-    padding: 5px;
-  }
-  .cell-num {
-    font-size: 1.3rem;
-    height: 50px;
-  }
-  .losange-plat {
-    width: 70px;
+  .boule {
+    width: 32px;
     height: 32px;
   }
-}
 
-@media (max-width: 480px) {
-  .historique {
-    width: 110px;
-    min-width: 80px;
+  /* --- 2. MAIN & HAMBURGER --- */
+  main {
+    /* Main prend tout l'espace restant après les 50px de l'historique */
+    width: calc(100% - 50px);
+    max-width: none;
   }
-  .historique h2 {
-    font-size: 0.9rem;
+
+  .main-header {
+    /* Ajout d'un padding en haut pour que le hamburger ne soit pas SUR l'image */
+    /* padding-top: 55px; */
+    padding-bottom: 0;
+    width: 100%;
+    /* On force une hauteur ou min-hauteur pour occuper l'espace */
+    height: 25vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
-  .boule {
-    width: 36px;
-    height: 36px;
+
+  .jackpot-img {
+    width: 95%;
+    height: 100%;
+    object-fit: contain; /* L'image s'adapte sans être déformée */
   }
+
+  /* --- 3. SECTION MIDDLE IDENTIQUE AU HEADER --- */
+  .section-middle {
+    height: 25vh; /*Même hauteur que le header
+    min-height: auto; /* Annule le min-height desktop */
+    margin-top: 0;
+  }
+
   .middle-logo {
-    width: 45%;
-    max-width: 130px;
+    width: 60%;
+    max-width: none;
+    /* margin-top: 0; Centré verticalement */
   }
+
+  /* --- 4. BOUTON HAMBURGER --- */
+  .hamburger {
+    top: 5px; /* Collé en haut */
+    right: 5px; /* Collé à droite */
+    /* On s'assure qu'il est visible sur le fond vert foncé du body/header */
+    background: rgba(0, 61, 30, 0.9);
+  }
+
+  /* --- 5. RESTE DU CONTENU (Tableau et Footer) --- */
   .section-bottom {
-    width: calc(100% - 16px);
-    margin: 6px 8px 14px 8px;
+    width: calc(100% - 10px);
+    margin: 5px auto 20px auto;
     padding: 4px;
   }
   .cell-num {
-    font-size: 1.1rem;
-    height: 44px;
-  }
-  .losange {
-    width: 55px;
-    height: 55px;
-  }
-  .losange-jaune {
-    width: 80px;
-    height: 80px;
+    font-size: 1.2rem;
+    height: 45px;
   }
   .losange-plat {
     width: 60px;
     height: 28px;
+  }
+  .jeton {
+    width: 40px;
+    height: 40px;
   }
 }
