@@ -703,17 +703,23 @@
   /**
    * Place une boule spécifique à une position spécifique sur l'arc.
    *
+   * Utilise la MÊME logique que la fin de animateRotation() :
+   * - Calcule l'angle via getPositionAngle(posIndex)
+   * - Calcule les coordonnées via angleToXY()
+   * - Calcule le translate par rapport à originalPositions[]
+   *
+   * Cela garantit une cohérence parfaite entre le placement statique
+   * et la fin de l'animation (pas de saut).
+   *
    * @param {number} bouleDataIndex - index dans BOULES_DATA (0-8)
    * @param {number} posIndex - position sur l'arc (0-8)
    */
   function positionBouleAt(bouleDataIndex, posIndex) {
     var group = refs.boulesGroups[bouleDataIndex];
-    if (!group) return;
+    if (!group || !originalPositions[bouleDataIndex]) return;
 
     var targetAngle = getPositionAngle(posIndex);
     var targetPos = angleToXY(targetAngle);
-
-    // Position originale de cette boule dans le SVG
     var origPos = originalPositions[bouleDataIndex];
 
     var dx = targetPos.x - origPos.x;
@@ -723,6 +729,7 @@
       "transform",
       "translate(" + dx.toFixed(2) + ", " + dy.toFixed(2) + ")",
     );
+    group.style.opacity = "1";
   }
 
   /**
@@ -787,116 +794,198 @@
   }
 
   /**
-   * Anime la rotation des boules : déplacement circulaire le long de l'arc.
+   * Anime la rotation des boules en BLOC RIGIDE avec son.
    *
-   * La rotation fait exactement 1 passage (les boules avancent de N positions
-   * pour que la boule gagnante arrive en position 4 = sommet).
+   * PRINCIPE :
+   * - Les 9 boules forment un bloc rigide (espacement constant 22.5°)
+   * - UN SEUL décalage angulaire global pour toutes les boules
+   * - Son de roulette joué pendant la rotation, arrêté à la fin
+   * - À la fin, chaque boule est placée à sa position EXACTE sur l'arc
+   *   en recalculant depuis endOrder (pas de flottement)
    *
-   * Le sens de rotation est : les boules se déplacent de la droite vers la gauche
-   * (les positions augmentent : pos 8 → 0 → wrapping).
-   *
-   * Pour faire "1 tour complet" visible, on fait tourner les boules de
-   * CONFIG.BOULE_COUNT positions (= 9), PLUS le décalage nécessaire pour
-   * que la boule gagnante atterrisse en position 4.
-   *
-   * @param {number[]} startOrder - ordre de départ (state.currentOrder avant rotation)
-   * @param {number[]} endOrder - ordre d'arrivée (state.currentOrder après rotation)
+   * @param {number[]} startOrder - ordre de départ
+   * @param {number[]} endOrder - ordre d'arrivée
    * @param {number} totalSteps - nombre total de positions à parcourir
-   * @returns {Promise} résolu quand la rotation est terminée
+   * @returns {Promise}
    */
   function animateRotation(startOrder, endOrder, totalSteps) {
     return new Promise(function (resolve) {
       var startTime = null;
-
-      // Pour chaque boule, calculer sa position de départ et d'arrivée en angle
-      // On va animer via un décalage angulaire global
       var spacing = 180 / (CONFIG.BOULE_COUNT - 1); // 22.5°
-      var totalAngleSweep = totalSteps * spacing;
+      var cycle = CONFIG.BOULE_COUNT * spacing; // 202.5°
 
-      // Positions de départ de chaque boule (en posIndex)
-      var startPositions = [];
-      for (var i = 0; i < CONFIG.BOULE_COUNT; i++) {
-        // Trouver la posIndex de la boule i dans startOrder
-        var posIdx = startOrder.indexOf(i);
-        startPositions.push(posIdx);
+      // === SON DE ROULETTE ===
+      var rouletteSound = new Audio("./assets/son/roulette.mp3");
+      rouletteSound.loop = true;
+      rouletteSound.volume = 0.6;
+
+      // Démarrer le son (avec gestion du autoplay bloqué par le navigateur)
+      var soundStarted = false;
+      try {
+        var playPromise = rouletteSound.play();
+        if (playPromise !== undefined) {
+          playPromise
+            .then(function () {
+              soundStarted = true;
+            })
+            .catch(function () {
+              // Autoplay bloqué — on ignore silencieusement
+              console.log(
+                "🔇 Son bloqué par le navigateur (interaction requise)",
+              );
+            });
+        }
+      } catch (e) {
+        // Fallback silencieux
       }
+
+      // Fonction pour arrêter le son proprement avec un fondu
+      function stopSound() {
+        if (!rouletteSound) return;
+
+        var fadeStart = rouletteSound.volume;
+        var fadeDuration = 500; // 500ms de fondu
+        var fadeStartTime = performance.now();
+
+        function fadeStep() {
+          var elapsed = performance.now() - fadeStartTime;
+          var progress = Math.min(elapsed / fadeDuration, 1);
+
+          rouletteSound.volume = fadeStart * (1 - progress);
+
+          if (progress < 1) {
+            requestAnimationFrame(fadeStep);
+          } else {
+            rouletteSound.pause();
+            rouletteSound.currentTime = 0;
+            rouletteSound.volume = fadeStart;
+          }
+        }
+
+        requestAnimationFrame(fadeStep);
+      }
+
+      // === CALCUL DU SWEEP ===
+      var totalSweep = totalSteps * spacing;
+
+      // Angles de départ pour chaque boule
+      var startAngles = [];
+      for (var i = 0; i < CONFIG.BOULE_COUNT; i++) {
+        var posIdx = startOrder.indexOf(i);
+        startAngles.push(getPositionAngle(posIdx));
+      }
+
+      // Angles d'arrivée EXACTS depuis endOrder
+      var endAngles = [];
+      for (var j = 0; j < CONFIG.BOULE_COUNT; j++) {
+        var endPosIdx = endOrder.indexOf(j);
+        endAngles.push(getPositionAngle(endPosIdx));
+      }
+
+      // Correction du sweep pour cohérence avec la boule gagnante
+      var winnerIdx = endOrder[4];
+      var winnerStart = startAngles[winnerIdx];
+      var winnerEnd = endAngles[winnerIdx]; // = 90° (position 4)
+
+      var baseDiff = winnerEnd - winnerStart;
+      var correctedSweep = baseDiff;
+      while (correctedSweep < totalSweep - cycle / 2) {
+        correctedSweep += cycle;
+      }
+      totalSweep = correctedSweep;
 
       function step(timestamp) {
         if (!startTime) startTime = timestamp;
         var elapsed = timestamp - startTime;
         var rawProgress = Math.min(elapsed / CONFIG.SPIN_DURATION, 1);
 
-        // Easing : ease-out quart pour un ralentissement naturel en fin de rotation
         var eased = easeOutQuart(rawProgress);
 
-        // Décalage angulaire actuel
-        var currentAngleSweep = totalAngleSweep * eased;
+        if (rawProgress >= 1) {
+          // === FIN : ARRÊTER LE SON ===
+          stopSound();
 
-        // Pour chaque boule, calculer son angle actuel
-        for (var b = 0; b < CONFIG.BOULE_COUNT; b++) {
-          var startPosIdx = startPositions[b];
-          var startAngle = getPositionAngle(startPosIdx);
-
-          // La rotation va vers la gauche (angles augmentent : 0° → 180°)
-          // Mais les boules "avancent" le long de l'arc :
-          // une boule en position 8 (droite) va vers position 7, 6, 5...
-          // Cela signifie que l'angle AUGMENTE (de 0° vers 180°)
-          var currentAngle = startAngle + currentAngleSweep;
-
-          // Wrapping : quand l'angle dépasse 180°, la boule "sort" par la gauche
-          // et réapparaît par la droite.
-          // On normalise l'angle dans [0, 180] via modulo sur le cycle complet
-          // Le cycle complet est 180° + spacing (car 9 boules, 8 intervalles)
-          // En fait le cycle de bouclage est :
-          // les boules tournent sur 9 "slots" répartis sur 180°
-          // donc le cycle est 9 * spacing = 9 * 22.5 = 202.5°
-          var cycle = CONFIG.BOULE_COUNT * spacing;
-          var wrappedAngle = ((currentAngle % cycle) + cycle) % cycle;
-
-          // Convertir en angle réel sur le demi-cercle
-          // Si wrappedAngle > 180°, la boule est "hors champ"
-          // (elle est dans la zone invisible sous le demi-cercle)
-          var displayAngle = wrappedAngle;
-
-          // Visibilité
-          var isVisible = displayAngle >= 0 && displayAngle <= 180;
-
-          if (isVisible) {
-            var pos = angleToXY(displayAngle);
+          // === FIN : POSITIONS FINALES EXACTES ===
+          // Recalculer chaque position proprement depuis endOrder
+          // pour garantir un placement parfait sur l'arc
+          for (var b = 0; b < CONFIG.BOULE_COUNT; b++) {
+            var finalPosIdx = endOrder.indexOf(b);
+            var finalAngle = getPositionAngle(finalPosIdx);
+            var finalPos = angleToXY(finalAngle);
             var origPos = originalPositions[b];
-            var dx = pos.x - origPos.x;
-            var dy = pos.y - origPos.y;
 
             refs.boulesGroups[b].setAttribute(
               "transform",
-              "translate(" + dx.toFixed(2) + ", " + dy.toFixed(2) + ")",
+              "translate(" +
+                (finalPos.x - origPos.x).toFixed(2) +
+                ", " +
+                (finalPos.y - origPos.y).toFixed(2) +
+                ")",
+            );
+            refs.boulesGroups[b].style.opacity = "1";
+          }
+
+          state.currentOrder = endOrder.slice();
+          resolve();
+          return;
+        }
+
+        // === PENDANT LA ROTATION ===
+        var currentSweep = totalSweep * eased;
+
+        for (var b = 0; b < CONFIG.BOULE_COUNT; b++) {
+          var rawAngle = startAngles[b] + currentSweep;
+          var wrapped = ((rawAngle % cycle) + cycle) % cycle;
+          var isVisible = wrapped <= 180;
+
+          if (isVisible) {
+            var pos = angleToXY(wrapped);
+            var origPos = originalPositions[b];
+            refs.boulesGroups[b].setAttribute(
+              "transform",
+              "translate(" +
+                (pos.x - origPos.x).toFixed(2) +
+                ", " +
+                (pos.y - origPos.y).toFixed(2) +
+                ")",
             );
             refs.boulesGroups[b].style.opacity = "1";
           } else {
+            refs.boulesGroups[b].setAttribute(
+              "transform",
+              "translate(-9999, -9999)",
+            );
             refs.boulesGroups[b].style.opacity = "0";
           }
         }
 
-        if (rawProgress < 1) {
-          requestAnimationFrame(step);
-        } else {
-          // Fin de rotation : placer toutes les boules à leurs positions finales exactes
-          state.currentOrder = endOrder.slice();
-          positionAllBoules();
-
-          // S'assurer que toutes les boules sont visibles
-          for (var v = 0; v < CONFIG.BOULE_COUNT; v++) {
-            refs.boulesGroups[v].style.opacity = "1";
-          }
-
-          resolve();
-        }
+        requestAnimationFrame(step);
       }
 
       requestAnimationFrame(step);
     });
   }
+  // /**
+  //  * Fait "rebondir" un angle pour qu'il reste dans [0, 180].
+  //  * Comme une balle de ping-pong entre deux murs.
+  //  *
+  //  * 0 → 180 → 0 → 180 → ...
+  //  *
+  //  * @param {number} angle - angle brut (peut dépasser 180 ou être négatif)
+  //  * @returns {number} angle entre 0 et 180
+  //  */
+  // function pingPongAngle(angle) {
+  //   var a = Math.abs(angle);
+  //   var period = 180;
+  //   var cycles = Math.floor(a / period);
+  //   var remainder = a - cycles * period;
 
+  //   if (cycles % 2 === 0) {
+  //     return remainder;
+  //   } else {
+  //     return period - remainder;
+  //   }
+  // }
   // --- FIN PARTIE E ---
   // ===== PARTIE F — CALCUL ORDRE FINAL + LANCEMENT SYNCHRONISÉ =====
 
@@ -1006,18 +1095,16 @@
   }
 
   /**
-   * Lance la séquence remplissage + rotation de manière synchronisée.
+   * Lance la séquence : remplissage D'ABORD, puis rotation ENSUITE.
    *
-   * Le remplissage et la rotation se font en parallèle :
-   * - Le remplissage commence immédiatement
-   * - La rotation commence après un petit délai (PAUSE_AFTER_FILL n'est PAS
-   *   un vrai délai ici : les deux sont synchronisés)
+   * Ordre strict :
+   * 1. Le remplissage progressif se déclenche (droite → gauche)
+   * 2. Quand le remplissage est terminé → petite pause
+   * 3. Le remplissage disparaît en fondu
+   * 4. La rotation des boules démarre
+   * 5. La rotation se termine avec la boule gagnante au sommet
    *
-   * En fait la spec dit : "le remplissage se synchronise avec la rotation
-   * (il se remplit pendant que les boules tournent)".
-   *
-   * Donc on lance les deux en même temps, et le remplissage dure le même
-   * temps que la rotation.
+   * Ce cycle se répète à chaque tour.
    *
    * @param {number} winnerDataIndex - index de la boule gagnante
    * @returns {Promise<object>} résolu avec les données de la boule gagnante
@@ -1029,29 +1116,30 @@
       var endOrder = result.endOrder;
       var totalSteps = result.totalSteps;
 
-      // Synchroniser les durées : le remplissage dure le même temps que la rotation
-      // On override temporairement CONFIG.FILL_DURATION
-      var originalFillDuration = CONFIG.FILL_DURATION;
-      CONFIG.FILL_DURATION = CONFIG.SPIN_DURATION;
-
-      // Lancer les deux animations en parallèle
-      var fillPromise = animateFill();
-      var spinPromise = animateRotation(
-        state.currentOrder.slice(),
-        endOrder,
-        totalSteps,
-      );
-
-      // Attendre que les deux soient terminées
-      Promise.all([fillPromise, spinPromise]).then(function () {
-        // Restaurer la durée originale
-        CONFIG.FILL_DURATION = originalFillDuration;
-
-        // Faire disparaître le remplissage en fondu
-        fadeOutFill().then(function () {
+      // ÉTAPE 1 : Remplissage progressif (droite → gauche)
+      animateFill()
+        .then(function () {
+          // ÉTAPE 2 : Pause après remplissage complet
+          return new Promise(function (r) {
+            setTimeout(r, CONFIG.PAUSE_AFTER_FILL);
+          });
+        })
+        .then(function () {
+          // ÉTAPE 3 : Faire disparaître le remplissage en fondu
+          return fadeOutFill();
+        })
+        .then(function () {
+          // ÉTAPE 4 : Lancer la rotation des boules
+          return animateRotation(
+            state.currentOrder.slice(),
+            endOrder,
+            totalSteps,
+          );
+        })
+        .then(function () {
+          // ÉTAPE 5 : Rotation terminée, résoudre avec les données du gagnant
           resolve(BOULES_DATA[winnerDataIndex]);
         });
-      });
     });
   }
 
@@ -1252,16 +1340,121 @@
   }
 
   // --- FIN PARTIE G ---
+  // ===== CORRECTION 3 — HIGHLIGHT CASE GAGNANTE DANS LE TABLEAU =====
+
+  /**
+   * Mapping numéro de boule → sélecteur CSS de la case dans le tableau.
+   *
+   * Les numéros 1-8 correspondent aux <td class="cell-num"> dont le contenu
+   * textuel est le numéro.
+   *
+   * Le numéro 0 (boule jaune) correspond au losange jaune :
+   * <td class="cell-losange-container" rowspan="2" colspan="2">
+   *   <div class="losange losange-jaune"></div>
+   * </td>
+   *
+   * Les deux autres losanges (rouge et gris) ne sont reliés à aucune boule.
+   */
+
+  /**
+   * Trouve la cellule <td> du tableau correspondant au numéro gagnant.
+   *
+   * @param {number} winnerNumber - le numéro de la boule gagnante (0-8)
+   * @returns {HTMLElement|null} l'élément à highlighter
+   */
+  function findWinnerCell(winnerNumber) {
+    // Cas spécial : boule jaune (n°0) → losange jaune
+    if (winnerNumber === 0) {
+      var losangeJaune = document.querySelector(".losange-jaune");
+      if (losangeJaune) {
+        // On highlight le <td> parent (cell-losange-container)
+        return losangeJaune.closest("td");
+      }
+      return null;
+    }
+
+    // Numéros 1-8 : chercher le <td class="cell-num"> dont le texte est le numéro
+    var allCells = document.querySelectorAll(".cell-num");
+    for (var i = 0; i < allCells.length; i++) {
+      var cellText = allCells[i].textContent.trim();
+      if (cellText === winnerNumber.toString()) {
+        return allCells[i];
+      }
+    }
+
+    return null;
+  }
+
+  /**
+   * Met en évidence la case gagnante dans le tableau.
+   *
+   * Applique une animation de highlight (flash lumineux) sur la cellule,
+   * puis la retire après quelques secondes.
+   *
+   * Si une case était déjà highlightée d'un tour précédent, on la nettoie d'abord.
+   *
+   * @param {object} winnerData - élément de BOULES_DATA de la boule gagnante
+   */
+  function highlightWinnerCell(winnerData) {
+    if (!winnerData) return;
+
+    // Nettoyer le highlight précédent
+    clearHighlight();
+
+    // Trouver la cellule
+    var cell = findWinnerCell(winnerData.number);
+    if (!cell) return;
+
+    // Ajouter la classe de highlight
+    cell.classList.add("cell-winner-highlight");
+
+    // Pour le losange jaune, on ajoute aussi une classe sur le losange lui-même
+    if (winnerData.number === 0) {
+      var losange = cell.querySelector(".losange-jaune");
+      if (losange) {
+        losange.classList.add("losange-winner-highlight");
+      }
+    }
+
+    // Retirer le highlight après 5 secondes (assez pour être visible,
+    // mais nettoyé avant le prochain tour)
+    setTimeout(function () {
+      clearHighlight();
+    }, 5000);
+  }
+
+  /**
+   * Supprime tous les highlights de cases gagnantes.
+   */
+  function clearHighlight() {
+    // Retirer la classe des cellules
+    var highlighted = document.querySelectorAll(".cell-winner-highlight");
+    for (var i = 0; i < highlighted.length; i++) {
+      highlighted[i].classList.remove("cell-winner-highlight");
+    }
+
+    // Retirer la classe des losanges
+    var highlightedLosanges = document.querySelectorAll(
+      ".losange-winner-highlight",
+    );
+    for (var j = 0; j < highlightedLosanges.length; j++) {
+      highlightedLosanges[j].classList.remove("losange-winner-highlight");
+    }
+  }
+
+  // --- FIN CORRECTION 3 (fonctions) ---
   // ===== PARTIE H — SÉQUENCE COMPLÈTE + INITIALISATION =====
 
   /**
    * Séquence complète d'un tour de roulette :
    *
-   * 1. Choisir la boule gagnante (setWinner ou aléatoire)
-   * 2. Lancer remplissage + rotation en parallèle (synchronisés)
-   * 3. Animer la lueur autour de la boule gagnante
-   * 4. Ajouter le résultat à l'historique
-   * 5. Réinitialiser le winnerBouleId pour le prochain tour
+   * 1. Nettoyer le highlight précédent
+   * 2. Choisir la boule gagnante (setWinner ou aléatoire)
+   * 3. Remplissage D'ABORD, puis rotation
+   * 4. Animer la lueur autour de la boule gagnante
+   * 5. Ajouter le résultat à l'historique
+   * 6. Mettre en évidence la case gagnante dans le tableau
+   * 7. Réinitialiser le winnerBouleId pour le prochain tour
    *
    * Ne fait rien si une animation est déjà en cours.
    */
@@ -1269,23 +1462,27 @@
     if (state.isSpinning) return;
     state.isSpinning = true;
 
-    // Étape 1 : Choisir le gagnant
+    // Étape 1 : Nettoyer le highlight du tour précédent
+    clearHighlight();
+
+    // Étape 2 : Choisir le gagnant
     var winnerIndex = pickWinner();
 
-    // Étape 2 : Remplissage + Rotation synchronisés
+    // Étape 3 : Remplissage puis Rotation (séquentiel)
     runFillAndSpin(winnerIndex)
       .then(function (winnerData) {
-        // Étape 3 : Lueur sur la boule gagnante
-        // + Étape 4 : Ajouter à l'historique (en parallèle de la lueur)
+        // Étape 4 : Ajouter à l'historique
         addToHistorique(winnerData);
+
+        // Étape 5 : Mettre en évidence la case dans le tableau
+        highlightWinnerCell(winnerData);
+
+        // Étape 6 : Lueur sur la boule gagnante
         return animateGlow(winnerData);
       })
       .then(function () {
-        // Étape 5 : Nettoyage
-        // Réinitialiser le winner pour le prochain tour
+        // Étape 7 : Nettoyage
         state.winnerBouleId = null;
-
-        // Tour terminé
         state.isSpinning = false;
       })
       .catch(function (err) {
