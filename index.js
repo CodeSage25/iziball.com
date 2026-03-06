@@ -103,7 +103,7 @@
   // ===== CONFIGURATION =====
   var CONFIG = {
     // Durées (ms)
-    FILL_DURATION: 3000, // durée du remplissage
+    FILL_DURATION: 60000, // durée du remplissage (60 secondes)
     SPIN_DURATION: 4000, // durée de la rotation
     GLOW_DURATION: 2500, // durée de la lueur gagnante
     PAUSE_AFTER_FILL: 400, // pause entre remplissage et rotation
@@ -544,7 +544,7 @@
     // Le path original : demi-cercle de rayon ~91.91, centré sur (155.61, 151.02)
     // On utilise les mêmes dimensions pour que le remplissage couvre exactement la zone
     var fillCX = 155.61;
-    var fillCY = 151.02;
+    var fillCY = 184.41;
     var fillRadius = 91.91;
 
     // L'arc part de la DROITE (angle 0°) et va vers la GAUCHE (angle 180°)
@@ -1096,40 +1096,38 @@
 
   /**
    * Lance la séquence : remplissage D'ABORD, puis rotation ENSUITE.
-   *
-   * Ordre strict :
-   * 1. Le remplissage progressif se déclenche (droite → gauche)
-   * 2. Quand le remplissage est terminé → petite pause
-   * 3. Le remplissage disparaît en fondu
-   * 4. La rotation des boules démarre
-   * 5. La rotation se termine avec la boule gagnante au sommet
-   *
-   * Ce cycle se répète à chaque tour.
+   * La fenêtre de mise est OUVERTE pendant le remplissage,
+   * et FERMÉE dès que la rotation commence.
    *
    * @param {number} winnerDataIndex - index de la boule gagnante
-   * @returns {Promise<object>} résolu avec les données de la boule gagnante
+   * @returns {Promise<object>}
    */
   function runFillAndSpin(winnerDataIndex) {
     return new Promise(function (resolve) {
-      // Calculer l'ordre d'arrivée
       var result = computeEndOrder(winnerDataIndex);
       var endOrder = result.endOrder;
       var totalSteps = result.totalSteps;
 
-      // ÉTAPE 1 : Remplissage progressif (droite → gauche)
+      // OUVRIR les mises pendant le remplissage
+      openBetting();
+
+      // ÉTAPE 1 : Remplissage progressif
       animateFill()
         .then(function () {
-          // ÉTAPE 2 : Pause après remplissage complet
+          // FERMER les mises à la fin du remplissage
+          closeBetting();
+
+          // ÉTAPE 2 : Pause
           return new Promise(function (r) {
             setTimeout(r, CONFIG.PAUSE_AFTER_FILL);
           });
         })
         .then(function () {
-          // ÉTAPE 3 : Faire disparaître le remplissage en fondu
+          // ÉTAPE 3 : Fondu du remplissage
           return fadeOutFill();
         })
         .then(function () {
-          // ÉTAPE 4 : Lancer la rotation des boules
+          // ÉTAPE 4 : Rotation
           return animateRotation(
             state.currentOrder.slice(),
             endOrder,
@@ -1137,7 +1135,6 @@
           );
         })
         .then(function () {
-          // ÉTAPE 5 : Rotation terminée, résoudre avec les données du gagnant
           resolve(BOULES_DATA[winnerDataIndex]);
         });
     });
@@ -1186,7 +1183,7 @@
       glowCircle.setAttribute("cy", cy);
       glowCircle.setAttribute("r", (CONFIG.BOULE_RADIUS + 6).toString());
       glowCircle.setAttribute("fill", "none");
-      glowCircle.setAttribute("stroke", "#FFD700");
+      glowCircle.setAttribute("stroke", "#FAFAFA");
       glowCircle.setAttribute("stroke-width", "4");
       glowCircle.setAttribute("opacity", "0");
       glowCircle.setAttribute("filter", "url(#glow-winner)");
@@ -1443,45 +1440,480 @@
   }
 
   // --- FIN CORRECTION 3 (fonctions) ---
+  // ===== MISES — ÉTAT ET FENÊTRE =====
+
+  /**
+   * État des mises pour le tour en cours.
+   *
+   * bets : Map< HTMLElement (la cellule td), { amount: number, chipEl: HTMLElement } >
+   * bettingOpen : true pendant le remplissage progressif, false sinon
+   * lockedLosange : null | "rouge" | "gris" — verrouillage mutuel des losanges
+   * selectedJetonValue : number | null — valeur du jeton actuellement sélectionné
+   * messageEl : HTMLElement — élément du message "mises fermées"
+   */
+  var miseState = {
+    bets: new Map(),
+    bettingOpen: false,
+    lockedLosange: null,
+    selectedJetonValue: null,
+    selectedJetonImg: null,
+    messageEl: null,
+    messageTimeout: null,
+    MAX_BET_PER_CELL: 10000,
+  };
+
+  /**
+   * Ouvre la fenêtre de mise (appelé quand le remplissage commence).
+   */
+  function openBetting() {
+    miseState.bettingOpen = true;
+    miseState.lockedLosange = null;
+    hideClosedMessage();
+
+    // Ajouter un indicateur visuel que les mises sont ouvertes
+    var table = document.querySelector(".table-outer-border");
+    if (table) {
+      table.classList.add("betting-open");
+    }
+  }
+
+  /**
+   * Ferme la fenêtre de mise (appelé quand le remplissage se termine).
+   */
+  function closeBetting() {
+    miseState.bettingOpen = false;
+
+    var table = document.querySelector(".table-outer-border");
+    if (table) {
+      table.classList.remove("betting-open");
+    }
+  }
+
+  /**
+   * Nettoie toutes les mises visuelles et l'état après un tour.
+   * Déverrouille aussi tous les losanges.
+   */
+  function clearAllBets() {
+    miseState.bets.forEach(function (betData, cell) {
+      if (betData.chipEl && betData.chipEl.parentNode) {
+        betData.chipEl.parentNode.removeChild(betData.chipEl);
+      }
+    });
+    miseState.bets.clear();
+    miseState.lockedLosange = null;
+    miseState.selectedJetonValue = null;
+    miseState.selectedJetonImg = null;
+
+    // Déverrouiller TOUS les losanges
+    var allLocked = document.querySelectorAll(".cell-locked");
+    for (var i = 0; i < allLocked.length; i++) {
+      allLocked[i].classList.remove("cell-locked");
+    }
+  }
+  /**
+   * Affiche le message "mises fermées".
+   */
+  function showClosedMessage() {
+    if (miseState.messageEl) {
+      hideClosedMessage();
+    }
+
+    var msg = document.createElement("div");
+    msg.className = "mises-fermees-message";
+    msg.innerHTML =
+      '<span class="mises-fermees-icon">🚫</span> Les mises sont fermées, le tirage se termine dans moins d\'une seconde.';
+    document.body.appendChild(msg);
+    miseState.messageEl = msg;
+
+    // Animation d'apparition
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () {
+        msg.classList.add("visible");
+      });
+    });
+
+    // Auto-disparition après 3 secondes
+    miseState.messageTimeout = setTimeout(function () {
+      hideClosedMessage();
+    }, 3000);
+  }
+
+  /**
+   * Cache le message "mises fermées".
+   */
+  function hideClosedMessage() {
+    if (miseState.messageTimeout) {
+      clearTimeout(miseState.messageTimeout);
+      miseState.messageTimeout = null;
+    }
+    if (miseState.messageEl) {
+      if (miseState.messageEl.parentNode) {
+        miseState.messageEl.parentNode.removeChild(miseState.messageEl);
+      }
+      miseState.messageEl = null;
+    }
+  }
+
+  /**
+   * Récupère la valeur du jeton actuellement sélectionné dans le footer.
+   * Retourne null si aucun jeton n'est sélectionné.
+   */
+  function getSelectedJeton() {
+    var selected = document.querySelector(".jeton.selected");
+    if (!selected) return null;
+
+    return {
+      value: parseInt(selected.getAttribute("data-value"), 10),
+      src: selected.getAttribute("src"),
+    };
+  }
+
+  // --- FIN PARTIE M1 ---
+  // ===== MISES — PLACEMENT VISUEL =====
+
+  /**
+   * Crée ou met à jour le visuel d'un jeton sur une case du tableau.
+   *
+   * @param {HTMLElement} cell - la cellule <td> ciblée
+   * @param {number} totalAmount - montant total sur cette case
+   * @param {string} chipImgSrc - src de l'image du dernier jeton placé
+   */
+  function renderChipOnCell(cell, totalAmount, chipImgSrc) {
+    var existing = miseState.bets.get(cell);
+    var chipEl;
+
+    if (existing && existing.chipEl) {
+      // Mettre à jour l'élément existant
+      chipEl = existing.chipEl;
+      var amountLabel = chipEl.querySelector(".chip-amount");
+      if (amountLabel) {
+        amountLabel.textContent = totalAmount;
+      }
+      // Animation de "bump" pour montrer l'ajout
+      chipEl.classList.remove("chip-bump");
+      void chipEl.offsetWidth;
+      chipEl.classList.add("chip-bump");
+    } else {
+      // Créer un nouvel élément de jeton
+      chipEl = document.createElement("div");
+      chipEl.className = "table-chip";
+
+      var img = document.createElement("img");
+      img.src = chipImgSrc;
+      img.className = "table-chip-img";
+      img.alt = totalAmount.toString();
+      chipEl.appendChild(img);
+
+      var label = document.createElement("span");
+      label.className = "chip-amount";
+      label.textContent = totalAmount;
+      chipEl.appendChild(label);
+
+      // Positionner sur la cellule
+      cell.style.position = "relative";
+      cell.appendChild(chipEl);
+
+      // Animation d'apparition
+      requestAnimationFrame(function () {
+        requestAnimationFrame(function () {
+          chipEl.classList.add("chip-visible");
+        });
+      });
+    }
+
+    return chipEl;
+  }
+
+  /**
+   * Tente de placer un jeton sur une case.
+   * Gère toutes les validations : fenêtre ouverte, jeton sélectionné,
+   * limite 10000, contrainte losanges.
+   *
+   * @param {HTMLElement} cell - la cellule <td> cliquée
+   */
+  function placeBet(cell) {
+    // 1. Vérifier que les mises sont ouvertes
+    if (!miseState.bettingOpen) {
+      showClosedMessage();
+      return;
+    }
+
+    // 2. Vérifier qu'un jeton est sélectionné
+    var jeton = getSelectedJeton();
+    if (!jeton) return;
+
+    // 3. Vérifier la contrainte losanges rouge/gris
+    var losangeType = getLosangeType(cell);
+    if (losangeType) {
+      if (miseState.lockedLosange && miseState.lockedLosange !== losangeType) {
+        // L'autre losange est verrouillé → bloquer
+        shakeCell(cell);
+        return;
+      }
+    }
+
+    // 4. Vérifier la limite de mise
+    var currentBet = miseState.bets.get(cell);
+    var currentAmount = currentBet ? currentBet.amount : 0;
+    var newAmount = currentAmount + jeton.value;
+
+    if (newAmount > miseState.MAX_BET_PER_CELL) {
+      // Limite atteinte → retour visuel
+      shakeCell(cell);
+      return;
+    }
+
+    // 5. Placer la mise
+    var chipEl = renderChipOnCell(cell, newAmount, jeton.src);
+    miseState.bets.set(cell, { amount: newAmount, chipEl: chipEl });
+
+    // 6. Verrouiller le losange opposé si nécessaire
+    if (losangeType) {
+      miseState.lockedLosange = losangeType;
+      updateLosangeLock();
+    }
+  }
+
+  /**
+   * Détermine si une cellule contient un losange rouge ou gris.
+   *
+   * @param {HTMLElement} cell - la cellule <td>
+   * @returns {string|null} "rouge", "gris", ou null
+   */
+  function getLosangeType(cell) {
+    if (cell.querySelector(".losange-rouge")) return "rouge";
+    if (cell.querySelector(".losange-gris")) return "gris";
+    return null;
+  }
+
+  /**
+   * Met à jour le verrouillage visuel des losanges.
+   * Si un losange est misé, l'autre est visuellement verrouillé.
+   */
+  function updateLosangeLock() {
+    var losangeRouge = document.querySelector(".losange-rouge");
+    var losangeGris = document.querySelector(".losange-gris");
+
+    if (!losangeRouge || !losangeGris) return;
+
+    var cellRouge = losangeRouge.closest("td");
+    var cellGris = losangeGris.closest("td");
+
+    if (miseState.lockedLosange === "rouge") {
+      // Rouge misé → gris verrouillé
+      if (cellGris) cellGris.classList.add("cell-locked");
+      if (cellRouge) cellRouge.classList.remove("cell-locked");
+    } else if (miseState.lockedLosange === "gris") {
+      // Gris misé → rouge verrouillé
+      if (cellRouge) cellRouge.classList.add("cell-locked");
+      if (cellGris) cellGris.classList.remove("cell-locked");
+    } else {
+      // Aucun verrouillage
+      if (cellRouge) cellRouge.classList.remove("cell-locked");
+      if (cellGris) cellGris.classList.remove("cell-locked");
+    }
+  }
+
+  /**
+   * Animation de "shake" sur une cellule pour indiquer un refus.
+   */
+  function shakeCell(cell) {
+    cell.classList.remove("cell-shake");
+    void cell.offsetWidth;
+    cell.classList.add("cell-shake");
+    setTimeout(function () {
+      cell.classList.remove("cell-shake");
+    }, 600);
+  }
+
+  // --- FIN PARTIE M2 ---
+  // ===== MISES — ÉCOUTEURS TABLEAU =====
+
+  /**
+   * Initialise les écouteurs de clic sur toutes les cellules du tableau.
+   * Appelé une seule fois dans init().
+   */
+  function initTableListeners() {
+    var cells = document.querySelectorAll(".table-outer-border td");
+
+    cells.forEach(function (cell) {
+      // Ignorer les cellules vides
+      if (cell.classList.contains("cell-empty")) return;
+
+      cell.style.cursor = "pointer";
+
+      cell.addEventListener("click", function (e) {
+        e.stopPropagation();
+        placeBet(cell);
+      });
+    });
+
+    // Intercepter les clics sur les jetons quand les mises sont fermées
+    var jetons = document.querySelectorAll(".jeton");
+    jetons.forEach(function (jeton) {
+      jeton.addEventListener("click", function () {
+        if (state.isSpinning && !miseState.bettingOpen) {
+          showClosedMessage();
+        }
+      });
+    });
+
+    // Bouton poubelle : effacer toutes les mises
+    var trashBtn = document.querySelector(".footer-trash");
+    if (trashBtn) {
+      trashBtn.addEventListener("click", function () {
+        clearAllBets();
+        updateLosangeLock();
+      });
+    }
+    // Bouton undo : rejouer les mises précédentes
+    var undoBtn = document.querySelector(".footer-undo");
+    if (undoBtn) {
+      // Supprimer l'ancien listener (celui du bloc FOOTER BOUTONS en haut du fichier)
+      // en le remplaçant par le nouveau
+      var newUndoBtn = undoBtn.cloneNode(true);
+      undoBtn.parentNode.replaceChild(newUndoBtn, undoBtn);
+
+      newUndoBtn.addEventListener("click", function () {
+        replayPreviousBets();
+      });
+    }
+  }
+
+  // --- FIN PARTIE M3 ---
+  // ===== MISES — REJEU DES MISES PRÉCÉDENTES =====
+
+  /**
+   * Sauvegarde des mises du tour précédent.
+   * Stocke un tableau de { cellIndex: number, amount: number, chipSrc: string }
+   * où cellIndex est l'index de la cellule parmi toutes les <td> du tableau.
+   */
+  var previousBets = [];
+
+  /**
+   * Sauvegarde les mises actuelles pour pouvoir les rejouer au tour suivant.
+   * Appelé AVANT clearAllBets() dans playRound().
+   */
+  function saveBetsForReplay() {
+    previousBets = [];
+    var allCells = document.querySelectorAll(".table-outer-border td");
+
+    miseState.bets.forEach(function (betData, cell) {
+      // Trouver l'index de cette cellule
+      var cellIndex = -1;
+      for (var i = 0; i < allCells.length; i++) {
+        if (allCells[i] === cell) {
+          cellIndex = i;
+          break;
+        }
+      }
+
+      if (cellIndex >= 0) {
+        // Récupérer le src de l'image du jeton
+        var chipSrc = "";
+        if (betData.chipEl) {
+          var img = betData.chipEl.querySelector(".table-chip-img");
+          if (img) chipSrc = img.src;
+        }
+
+        previousBets.push({
+          cellIndex: cellIndex,
+          amount: betData.amount,
+          chipSrc: chipSrc,
+        });
+      }
+    });
+  }
+
+  /**
+   * Rejoue les mises du tour précédent.
+   * Place automatiquement les mêmes jetons sur les mêmes cases.
+   * Ne fonctionne que si les mises sont ouvertes.
+   */
+  function replayPreviousBets() {
+    if (!miseState.bettingOpen) {
+      showClosedMessage();
+      return;
+    }
+
+    if (previousBets.length === 0) {
+      console.log("ℹ️ Aucune mise précédente à rejouer");
+      return;
+    }
+
+    // D'abord nettoyer les mises actuelles
+    clearAllBets();
+
+    var allCells = document.querySelectorAll(".table-outer-border td");
+
+    for (var i = 0; i < previousBets.length; i++) {
+      var bet = previousBets[i];
+
+      if (bet.cellIndex < 0 || bet.cellIndex >= allCells.length) continue;
+
+      var cell = allCells[bet.cellIndex];
+
+      // Vérifier la limite
+      if (bet.amount > miseState.MAX_BET_PER_CELL) continue;
+
+      // Déterminer le src de l'image — utiliser le chipSrc sauvegardé
+      // ou trouver le jeton le plus proche de la valeur
+      var chipSrc = bet.chipSrc;
+      if (!chipSrc) {
+        // Fallback : utiliser le premier jeton disponible
+        var firstJeton = document.querySelector(".jeton");
+        if (firstJeton) chipSrc = firstJeton.src;
+      }
+
+      // Placer visuellement
+      var chipEl = renderChipOnCell(cell, bet.amount, chipSrc);
+      miseState.bets.set(cell, { amount: bet.amount, chipEl: chipEl });
+
+      // Gérer le verrouillage losange
+      var losangeType = getLosangeType(cell);
+      if (losangeType) {
+        miseState.lockedLosange = losangeType;
+      }
+    }
+
+    // Mettre à jour le verrouillage visuel
+    updateLosangeLock();
+
+    console.log(
+      "🔄 Mises précédentes rejouées (" + previousBets.length + " cases)",
+    );
+  }
+
+  // --- FIN PARTIE M4 (rejeu) ---
   // ===== PARTIE H — SÉQUENCE COMPLÈTE + INITIALISATION =====
 
   /**
-   * Séquence complète d'un tour de roulette :
-   *
-   * 1. Nettoyer le highlight précédent
-   * 2. Choisir la boule gagnante (setWinner ou aléatoire)
-   * 3. Remplissage D'ABORD, puis rotation
-   * 4. Animer la lueur autour de la boule gagnante
-   * 5. Ajouter le résultat à l'historique
-   * 6. Mettre en évidence la case gagnante dans le tableau
-   * 7. Réinitialiser le winnerBouleId pour le prochain tour
-   *
-   * Ne fait rien si une animation est déjà en cours.
+   * Séquence complète d'un tour de roulette.
+   * Sauvegarde les mises avant de les nettoyer pour permettre le rejeu.
    */
   function playRound() {
     if (state.isSpinning) return;
     state.isSpinning = true;
 
-    // Étape 1 : Nettoyer le highlight du tour précédent
+    // Nettoyer le tour précédent
     clearHighlight();
 
-    // Étape 2 : Choisir le gagnant
+    // Sauvegarder les mises du tour en cours AVANT de les effacer
+    saveBetsForReplay();
+    clearAllBets();
+
     var winnerIndex = pickWinner();
 
-    // Étape 3 : Remplissage puis Rotation (séquentiel)
     runFillAndSpin(winnerIndex)
       .then(function (winnerData) {
-        // Étape 4 : Ajouter à l'historique
+        // Sauvegarder les mises de CE tour (celles placées pendant le remplissage)
+        saveBetsForReplay();
+
         addToHistorique(winnerData);
-
-        // Étape 5 : Mettre en évidence la case dans le tableau
         highlightWinnerCell(winnerData);
-
-        // Étape 6 : Lueur sur la boule gagnante
         return animateGlow(winnerData);
       })
       .then(function () {
-        // Étape 7 : Nettoyage
         state.winnerBouleId = null;
         state.isSpinning = false;
       })
@@ -1490,7 +1922,6 @@
         state.isSpinning = false;
       });
   }
-
   /**
    * Initialisation complète de la roulette ZeBall.
    *
@@ -1531,6 +1962,8 @@
     // Donc les transforms sont tous (0, 0) au départ
     state.currentOrder = [0, 1, 2, 3, 4, 5, 6, 7, 8];
     positionAllBoules();
+    // 6b. Initialiser les écouteurs de mise sur le tableau
+    initTableListeners();
 
     // 7. Rendre le SVG cliquable pour lancer un tour manuellement
     refs.svgLogo.style.pointerEvents = "auto";

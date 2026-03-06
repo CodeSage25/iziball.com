@@ -134,7 +134,7 @@ main {
 .section-middle {
   width: 100%;
   position: relative;
-  overflow: hidden;
+  overflow: visible;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -159,14 +159,13 @@ main {
   position: relative;
   z-index: 2;
   width: 90%;
-  /* max-width: 220px; */
-  /* height: auto; */
   object-fit: contain;
   filter: drop-shadow(0 4px 15px rgba(0, 0, 0, 0.7));
   pointer-events: none;
   user-select: none;
   margin-top: 80px;
   margin-bottom: 10px;
+  overflow: visible;
 }
 
 /* ========================================
@@ -733,4 +732,194 @@ main {
 .losange-winner-highlight {
   animation: losange-winner-glow 2s ease-in-out forwards;
   transform: scale(1.15);
+}
+
+/* ========================================
+   JETONS SUR LE TABLEAU
+   ======================================== */
+
+/* Jeton placé sur une case — positionné à DROITE du chiffre */
+.table-chip {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  transform: scale(0);
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  pointer-events: none;
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.table-chip.chip-visible {
+  transform: scale(1);
+}
+
+.table-chip-img {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.6));
+}
+
+.chip-amount {
+  display: block;
+  margin-top: 2px;
+  font-size: 0.7rem;
+  font-weight: 800;
+  color: #ffd700;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
+  background: rgba(0, 0, 0, 0.6);
+  padding: 1px 6px;
+  border-radius: 8px;
+  white-space: nowrap;
+}
+
+@keyframes chip-bump {
+  0% {
+    transform: scale(1);
+  }
+  30% {
+    transform: scale(1.25);
+  }
+  60% {
+    transform: scale(0.95);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.table-chip.chip-bump {
+  animation: chip-bump 0.35s ease forwards;
+}
+
+.table-chip.chip-bump {
+  animation: chip-bump 0.35s ease forwards;
+}
+
+/* ========================================
+   FENÊTRE DE MISE OUVERTE
+   ======================================== */
+
+/* Bordure lumineuse quand les mises sont ouvertes */
+.table-outer-border.betting-open {
+  box-shadow: 0 0 15px 3px rgba(0, 255, 100, 0.4);
+  border-color: #00ff64;
+  transition:
+    box-shadow 0.5s ease,
+    border-color 0.5s ease;
+}
+
+/* ========================================
+   CELLULE VERROUILLÉE (losange opposé)
+   ======================================== */
+.cell-locked {
+  opacity: 0.35;
+  pointer-events: none;
+  position: relative;
+}
+
+.cell-locked::after {
+  content: "🔒";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 1.5rem;
+  z-index: 15;
+}
+
+/* ========================================
+   ANIMATION SHAKE (refus de mise)
+   ======================================== */
+@keyframes cell-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  15% {
+    transform: translateX(-6px);
+  }
+  30% {
+    transform: translateX(6px);
+  }
+  45% {
+    transform: translateX(-4px);
+  }
+  60% {
+    transform: translateX(4px);
+  }
+  75% {
+    transform: translateX(-2px);
+  }
+  90% {
+    transform: translateX(2px);
+  }
+}
+
+.cell-shake {
+  animation: cell-shake 0.5s ease;
+}
+
+/* ========================================
+   MESSAGE "MISES FERMÉES"
+   ======================================== */
+.mises-fermees-message {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.8);
+  background: rgba(0, 0, 0, 0.9);
+  color: #fff;
+  padding: 18px 28px;
+  border-radius: 12px;
+  border: 2px solid #ff4444;
+  font-size: 0.95rem;
+  font-weight: 600;
+  text-align: center;
+  z-index: 2000;
+  opacity: 0;
+  transition:
+    opacity 0.3s ease,
+    transform 0.3s ease;
+  max-width: 90vw;
+  box-shadow: 0 8px 30px rgba(255, 0, 0, 0.3);
+}
+
+.mises-fermees-message.visible {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+}
+
+.mises-fermees-icon {
+  display: block;
+  font-size: 2rem;
+  margin-bottom: 8px;
+}
+
+/* ========================================
+   RESPONSIVE — JETONS TABLEAU
+   ======================================== */
+@media (max-width: 700px) {
+  .table-chip-img {
+    width: 24px;
+    height: 24px;
+  }
+
+  .chip-amount {
+    font-size: 0.55rem;
+    padding: 0px 3px;
+  }
+
+  .table-chip {
+    top: 2px;
+    right: 2px;
+  }
+
+  .mises-fermees-message {
+    font-size: 0.8rem;
+    padding: 14px 20px;
+  }
 }
