@@ -103,7 +103,7 @@
   // ===== CONFIGURATION =====
   var CONFIG = {
     // Durées (ms)
-    FILL_DURATION: 60000, // durée du remplissage (60 secondes)
+    FILL_DURATION: 30000, // durée du remplissage (60 secondes)
     SPIN_DURATION: 4000, // durée de la rotation
     GLOW_DURATION: 2500, // durée de la lueur gagnante
     PAUSE_AFTER_FILL: 400, // pause entre remplissage et rotation
@@ -511,7 +511,7 @@
   function createFillArc() {
     refs.fillArcEl = document.createElementNS(svgNS, "path");
     refs.fillArcEl.setAttribute("id", "fill-arc-progress");
-    refs.fillArcEl.setAttribute("fill", "rgba(0, 180, 80, 0.35)");
+    refs.fillArcEl.setAttribute("fill", "rgba(254, 215, 0, 1)");
     refs.fillArcEl.setAttribute("opacity", "0");
     refs.fillArcEl.setAttribute("d", "");
 
@@ -543,9 +543,9 @@
     // Rayon de la zone intérieure (extrait du path original)
     // Le path original : demi-cercle de rayon ~91.91, centré sur (155.61, 151.02)
     // On utilise les mêmes dimensions pour que le remplissage couvre exactement la zone
-    var fillCX = 155.61;
-    var fillCY = 184.41;
-    var fillRadius = 91.91;
+    var fillCX = 155.67;
+    var fillCY = 159.41;
+    var fillRadius = 90;
 
     // L'arc part de la DROITE (angle 0°) et va vers la GAUCHE (angle 180°)
     // À progress=0 : rien n'est rempli
@@ -614,7 +614,8 @@
         return;
       }
 
-      // Rendre visible
+      // Rendre visible (on n'utilise plus fillArcEl pour le remplissage visuel,
+      // mais on le garde pour la compatibilité)
       refs.fillArcEl.setAttribute("opacity", "1");
 
       var startTime = null;
@@ -641,14 +642,18 @@
   }
 
   /**
-   * Fait disparaître le remplissage en fondu (opacity → 0),
-   * puis nettoie le path.
+   * Fait disparaître le remplissage (balayeur) en fondu.
    *
-   * @returns {Promise} résolu quand le fondu est terminé
+   * @returns {Promise}
    */
   function fadeOutFill() {
     return new Promise(function (resolve) {
-      if (!refs.fillArcEl) {
+      var sweepOverlay = document.getElementById("sweep-overlay");
+      var loadingIndicator = document.getElementById("loading-indicator");
+      var loadingArc = document.getElementById("loading-arc");
+      var startIcon = document.getElementById("start-icon");
+
+      if (!sweepOverlay) {
         resolve();
         return;
       }
@@ -660,14 +665,37 @@
         var elapsed = timestamp - startTime;
         var progress = Math.min(elapsed / CONFIG.FADE_OUT_FILL, 1);
 
-        refs.fillArcEl.setAttribute("opacity", (1 - progress).toFixed(3));
+        var opacity = (1 - progress).toFixed(3);
+        sweepOverlay.setAttribute("opacity", opacity);
+
+        if (loadingIndicator) {
+          loadingIndicator.style.opacity = opacity;
+        }
+
+        if (refs.fillArcEl) {
+          refs.fillArcEl.setAttribute("opacity", "0");
+        }
 
         if (progress < 1) {
           requestAnimationFrame(step);
         } else {
           // Nettoyer
-          refs.fillArcEl.setAttribute("d", "");
-          refs.fillArcEl.setAttribute("opacity", "0");
+          sweepOverlay.setAttribute("opacity", "0");
+
+          if (loadingIndicator) {
+            loadingIndicator.style.opacity = "0";
+          }
+          if (loadingArc) {
+            loadingArc.setAttribute("stroke-dashoffset", "113.1");
+          }
+          if (startIcon) {
+            startIcon.style.opacity = "0.6";
+          }
+          if (refs.fillArcEl) {
+            refs.fillArcEl.setAttribute("d", "");
+            refs.fillArcEl.setAttribute("opacity", "0");
+          }
+
           resolve();
         }
       }

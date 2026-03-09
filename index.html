@@ -2482,15 +2482,29 @@
           <g id="zebal">
             <!-- Fond vert : demi-cercle étendu 25px plus bas -->
             <path
-              d="M155.67,-0.33 C241.7,-0.33,311.34,69.31,311.34,155.34 L311.34,184.41 L0,184.41 L0,155.34 C0,69.31,69.64,-0.33,155.67,-0.33 Z"
+              d="M 155.67,-0.33 
+                 C 241.7,-0.33 311.34,69.31 311.34,155.34 
+                 L 311.34,184.41 
+                 L 0,184.41 
+                 L 0,155.34 
+                 C 0,69.31 69.64,-0.33 155.67,-0.33 Z"
               fill="#52aa3e"
             />
             <!-- Bordure blanche -->
             <path
-              d="M155.67,-0.33 C241.7,-0.33,311.34,69.31,311.34,155.34 L311.34,184.41 L0,184.41 L0,155.34 C0,69.31,69.64,-0.33,155.67,-0.33 Z
-     M155.67,1.53 C70.82,1.53,1.86,70.49,1.86,155.34 L1.86,182.56 L309.48,182.56 L309.48,155.34 C309.48,70.49,240.52,1.53,155.67,1.53 Z"
+              d="M 155.67,-1.33 
+                 C 242.24,-1.33 312.34,68.77 312.34,155.34 
+                 L 312.34,185.41 
+                 L -1,185.41 
+                 L -1,155.34 
+                 C -1,68.77 69.1,-1.33 155.67,-1.33 Z
+                 M 155.67,0.67 
+                 C 70.18,0.67 1,69.85 1,155.34 
+                 L 1,183.41 
+                 L 310.34,183.41 
+                 L 310.34,155.34 
+                 C 310.34,69.85 241.16,0.67 155.67,0.67 Z"
               fill="#fff"
-              fill-rule="evenodd"
             />
           </g>
 
@@ -2611,16 +2625,119 @@
             />
           </g>
 
-          <!-- ZONE INTÉRIEURE (agrandie pour correspondre au nouvel arc) -->
+          <!-- ZONE INTÉRIEURE -->
           <g id="zone-interieure">
+            <!-- Demi-cercle intérieur rayon 90, centré sur (155.67, 159.41) -->
             <path
-              d="M247.52,184.41 C247.52,133.65,206.37,92.11,155.61,92.11 S63.7,133.65,63.7,184.41 Z"
+              id="zone-interieure-path"
+              d="M 65.67,159.41 
+                 A 90,90 0 0 1 245.67,159.41 
+                 L 245.67,184.41 
+                 L 65.67,184.41 
+                 Z"
               fill="#215f1e"
             />
+
+            <!-- ClipPath pour masquer ce qui dépasse sous l'arc -->
+            <!-- DEFS GLOBAUX — directement sous <svg>, PAS dans un <g> -->
+            <defs>
+              <clipPath id="arc-bottom-clip">
+                <path
+                  d="M 65.67,159.41 
+         A 90,90 0 0 1 245.67,159.41 
+         L 245.67,184.41 
+         L 65.67,184.41 
+         Z"
+                />
+              </clipPath>
+
+              <linearGradient
+                id="sweep-gradient"
+                x1="100%"
+                y1="0%"
+                x2="0%"
+                y2="0%"
+              >
+                <stop
+                  id="sweep-stop1"
+                  offset="0%"
+                  stop-color="#2a7a24"
+                  stop-opacity="1"
+                />
+                <stop
+                  id="sweep-stop2"
+                  offset="0%"
+                  stop-color="#ffffff"
+                  stop-opacity="1"
+                />
+                <stop
+                  id="sweep-stop3"
+                  offset="0%"
+                  stop-color="#215f1e"
+                  stop-opacity="0"
+                />
+              </linearGradient>
+            </defs>
+
+            <!-- ZONE INTÉRIEURE -->
+            <g id="zone-interieure">
+              <path
+                id="zone-interieure-path"
+                d="M 65.67,159.41 
+       A 90,90 0 0 1 245.67,159.41 
+       L 245.67,184.41 
+       L 65.67,184.41 
+       Z"
+                fill="#215f1e"
+              />
+
+              <!-- Sweep overlay — rect calé exactement sur le demi-cercle -->
+              <g clip-path="url(#arc-bottom-clip)">
+                <rect
+                  id="sweep-overlay"
+                  x="65.67"
+                  y="69.41"
+                  width="180"
+                  height="115"
+                  fill="url(#sweep-gradient)"
+                  opacity="0"
+                />
+              </g>
+
+              <!-- Icône engrenage -->
+              <g clip-path="url(#arc-bottom-clip)">
+                <text
+                  id="start-icon"
+                  x="155.67"
+                  y="185.41"
+                  text-anchor="middle"
+                  dominant-baseline="middle"
+                  fill="rgba(255,255,255,0.6)"
+                  font-size="32"
+                >
+                  &#9881;
+                </text>
+              </g>
+            </g>
+
+            <!-- Icône ⚙️ centrée SUR la ligne de l'arc, partie basse masquée -->
+            <g clip-path="url(#arc-bottom-clip)">
+              <text
+                id="start-icon"
+                x="155.67"
+                y="185.41"
+                text-anchor="middle"
+                dominant-baseline="middle"
+                fill="rgba(255,255,255,0.6)"
+                font-size="32"
+              >
+                &#9881;
+              </text>
+            </g>
           </g>
 
           <!-- TEXTE ZEBAL -->
-          <g id="texte-zebal">
+          <g id="texte-zebal" transform="translate(-31.13, -12.2) scale(1.2)">
             <g id="lettre-z">
               <path
                 d="m103.49,123.35l8.75-11.58h-8.38v-7.31h18.65v6.39l-9.31,12.36h9.57v7.54h-19.28v-7.39Z"
