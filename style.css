@@ -119,13 +119,15 @@ main {
 .main-header {
   width: 100%;
   text-align: center;
-  padding: 16px 10px 8px;
+  padding: 0px 10px 8px;
 }
 
 .jackpot-img {
   max-width: 100%;
   height: auto;
+  margin-top: -40px;
   filter: drop-shadow(0 0 12px rgba(255, 200, 50, 0.5));
+  margin-bottom: 20px;
 }
 
 /* ========================================
@@ -139,16 +141,16 @@ main {
   justify-content: center;
   align-items: center;
   min-height: 200px;
-  margin-left: 20px;
-  margin-right: 20px;
+  /* margin-left: 20px;
+  margin-right: 20px; */
 }
 
 .middle-bg {
   position: absolute;
-  top: -20px;
+  top: -10px;
   left: 0;
   width: 100%;
-  height: 100%;
+  height: 80%;
   object-fit: cover;
   pointer-events: none;
   user-select: none;
@@ -666,28 +668,28 @@ main {
    HIGHLIGHT CASE GAGNANTE
    ======================================== */
 
-/* Animation de pulsation lumineuse pour la case gagnante */
+/* REMPLACER winner-pulse entier par : */
 @keyframes winner-pulse {
   0% {
-    box-shadow: inset 0 0 0 0 rgba(255, 215, 0, 0);
+    box-shadow: inset 0 0 0 0 rgba(180, 235, 255, 0);
   }
   15% {
-    box-shadow: inset 0 0 30px 8px rgba(255, 215, 0, 0.8);
+    box-shadow: inset 0 0 30px 8px rgba(180, 235, 255, 0.9);
   }
   30% {
-    box-shadow: inset 0 0 10px 2px rgba(255, 215, 0, 0.3);
+    box-shadow: inset 0 0 10px 2px rgba(180, 235, 255, 0.35);
   }
   45% {
-    box-shadow: inset 0 0 30px 8px rgba(255, 215, 0, 0.8);
+    box-shadow: inset 0 0 30px 8px rgba(180, 235, 255, 0.9);
   }
   60% {
-    box-shadow: inset 0 0 10px 2px rgba(255, 215, 0, 0.3);
+    box-shadow: inset 0 0 10px 2px rgba(180, 235, 255, 0.35);
   }
   75% {
-    box-shadow: inset 0 0 25px 6px rgba(255, 215, 0, 0.6);
+    box-shadow: inset 0 0 25px 6px rgba(180, 235, 255, 0.7);
   }
   100% {
-    box-shadow: inset 0 0 15px 4px rgba(255, 215, 0, 0.4);
+    box-shadow: inset 0 0 15px 4px rgba(180, 235, 255, 0.45);
   }
 }
 
@@ -701,31 +703,31 @@ main {
 }
 
 /* Renforcement pour les cases numériques (rouge/noir) */
-.cell-num.cell-winner-highlight {
-  background-image: linear-gradient(
-    135deg,
-    rgba(255, 215, 0, 0.25) 0%,
-    transparent 50%,
-    rgba(255, 215, 0, 0.25) 100%
-  );
+/* REMPLACER cell-num.cell-winner-highlight par : */
+.cell-winner-highlight {
+  animation: winner-pulse 2s ease-in-out forwards;
+  outline: 3px solid #b4ebff;
+  outline-offset: -3px;
+  position: relative;
+  z-index: 5;
 }
 
 /* Highlight spécifique pour le losange jaune quand il gagne */
 @keyframes losange-winner-glow {
   0% {
-    filter: brightness(1) drop-shadow(0 0 0 rgba(255, 215, 0, 0));
+    filter: brightness(1) drop-shadow(0 0 0px rgba(180, 235, 255, 0));
   }
   25% {
-    filter: brightness(1.5) drop-shadow(0 0 15px rgba(255, 215, 0, 0.9));
+    filter: brightness(1.5) drop-shadow(0 0 15px rgba(180, 235, 255, 0.95));
   }
   50% {
-    filter: brightness(1.2) drop-shadow(0 0 8px rgba(255, 215, 0, 0.5));
+    filter: brightness(1.2) drop-shadow(0 0 8px rgba(180, 235, 255, 0.5));
   }
   75% {
-    filter: brightness(1.5) drop-shadow(0 0 15px rgba(255, 215, 0, 0.9));
+    filter: brightness(1.5) drop-shadow(0 0 15px rgba(180, 235, 255, 0.95));
   }
   100% {
-    filter: brightness(1.3) drop-shadow(0 0 10px rgba(255, 215, 0, 0.6));
+    filter: brightness(1.3) drop-shadow(0 0 10px rgba(180, 235, 255, 0.65));
   }
 }
 
@@ -741,21 +743,21 @@ main {
 /* Jeton placé sur une case — positionné à DROITE du chiffre */
 .table-chip {
   position: absolute;
-  top: 4px;
+  top: 50%;
+  transform: translateY(-50%) scale(0);
   right: 4px;
-  transform: scale(0);
   z-index: 10;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
+  gap: 6px;
   pointer-events: none;
   transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .table-chip.chip-visible {
-  transform: scale(1);
+  transform: translateY(-50%) scale(1);
 }
-
 .table-chip-img {
   width: 40px;
   height: 40px;
@@ -764,16 +766,25 @@ main {
 }
 
 .chip-amount {
-  display: block;
-  margin-top: 2px;
-  font-size: 0.7rem;
+  position: absolute;
+  right: 44px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.62rem;
   font-weight: 800;
   color: #ffd700;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
-  background: rgba(0, 0, 0, 0.6);
-  padding: 1px 6px;
-  border-radius: 8px;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 1);
+  background: linear-gradient(
+    135deg,
+    rgba(0, 0, 0, 0.85),
+    rgba(20, 20, 20, 0.9)
+  );
+  padding: 3px 8px;
+  border-radius: 20px;
   white-space: nowrap;
+  border: 1px solid rgba(255, 215, 0, 0.4);
+  letter-spacing: 0.5px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
 }
 
 @keyframes chip-bump {
@@ -922,4 +933,20 @@ main {
     font-size: 0.8rem;
     padding: 14px 20px;
   }
+}
+/* Forcer le verrouillage sur la dernière ligne du tableau */
+.table-outer-border table tr:last-child td.cell-locked {
+  opacity: 0.35 !important;
+  pointer-events: none !important;
+  position: relative;
+}
+
+.table-outer-border table tr:last-child td.cell-locked::after {
+  content: "🔒";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 1.5rem;
+  z-index: 15;
 }

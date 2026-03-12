@@ -103,12 +103,12 @@
   // ===== CONFIGURATION =====
   var CONFIG = {
     // Durées (ms)
-    FILL_DURATION: 30000, // durée du remplissage (60 secondes)
-    SPIN_DURATION: 4000, // durée de la rotation
-    GLOW_DURATION: 2500, // durée de la lueur gagnante
-    PAUSE_AFTER_FILL: 400, // pause entre remplissage et rotation
-    FADE_OUT_FILL: 600, // durée du fondu de disparition du remplissage
-    AUTO_SPIN_INTERVAL: 14000, // intervalle entre tours auto
+    FILL_DURATION: 20000, // durée du remplissage (20 secondes)
+    SPIN_DURATION: 5500, // durée de la rotation
+    GLOW_DURATION: 3000, // durée de la lueur gagnante
+    PAUSE_AFTER_FILL: 200, // pause entre remplissage et rotation
+    FADE_OUT_FILL: 500, // durée du fondu de disparition du remplissage
+    AUTO_SPIN_INTERVAL: 1400, // intervalle entre tours auto
     FIRST_SPIN_DELAY: 1500, // délai avant le premier tour
 
     // Géométrie du demi-cercle (tirée du SVG original)
@@ -129,8 +129,8 @@
   var BOULES_DATA = [
     { id: "boule-1", index: 0, number: 2, color: "#e30613", type: "rouge" },
     { id: "boule-2", index: 1, number: 1, color: "#000000", type: "noire" },
-    { id: "boule-3", index: 2, number: 3, color: "#e30613", type: "rouge" },
-    { id: "boule-4", index: 3, number: 4, color: "#000000", type: "noire" },
+    { id: "boule-4", index: 2, number: 4, color: "#e30613", type: "rouge" }, // ← remonté
+    { id: "boule-3", index: 3, number: 3, color: "#000000", type: "noire" }, // ← descendu
     { id: "boule-5", index: 4, number: 0, color: "#fed700", type: "jaune" },
     { id: "boule-6", index: 5, number: 7, color: "#e30613", type: "rouge" },
     { id: "boule-7", index: 6, number: 6, color: "#000000", type: "noire" },
@@ -309,10 +309,15 @@
   /**
    * Easing ease-out quart : décélération naturelle
    */
+
   function easeOutQuart(t) {
     return 1 - Math.pow(1 - t, 4);
   }
 
+  // Décélération exponentielle : démarre très vite, ralentit fortement en fin de course
+  function easeOutExpo(t) {
+    return t === 1 ? 1 : 1 - Math.pow(2, -10 * t);
+  }
   /**
    * Easing ease-in-out quad
    */
@@ -511,7 +516,8 @@
   function createFillArc() {
     refs.fillArcEl = document.createElementNS(svgNS, "path");
     refs.fillArcEl.setAttribute("id", "fill-arc-progress");
-    refs.fillArcEl.setAttribute("fill", "rgba(254, 215, 0, 1)");
+    //=======Changement couleur
+    refs.fillArcEl.setAttribute("fill", "rgb(143, 155, 16");
     refs.fillArcEl.setAttribute("opacity", "0");
     refs.fillArcEl.setAttribute("d", "");
 
@@ -519,6 +525,16 @@
     // zone-interieure est déjà juste avant texte-zebal grâce à reorganizeZOrder()
     var svg = refs.svgLogo;
     svg.insertBefore(refs.fillArcEl, refs.texteZebal);
+
+    // Extraire l'icône de zone-interieure et la remettre AU-DESSUS du fill
+    var startIcon = document.getElementById("start-icon");
+    if (startIcon) {
+      var iconParentG = startIcon.parentNode; // le <g clip-path="...">
+      if (iconParentG && iconParentG.parentNode === refs.zoneInterieure) {
+        refs.zoneInterieure.removeChild(iconParentG);
+        svg.insertBefore(iconParentG, refs.texteZebal);
+      }
+    }
   }
 
   /**
@@ -544,8 +560,8 @@
     // Le path original : demi-cercle de rayon ~91.91, centré sur (155.61, 151.02)
     // On utilise les mêmes dimensions pour que le remplissage couvre exactement la zone
     var fillCX = 155.67;
-    var fillCY = 159.41;
-    var fillRadius = 90;
+    var fillCY = 184.41; // bas de la zone — le camembert part d'ici
+    var fillRadius = 115; // agrandi pour atteindre le sommet de l'arc (184.41 - 69.41 = 115)
 
     // L'arc part de la DROITE (angle 0°) et va vers la GAUCHE (angle 180°)
     // À progress=0 : rien n'est rempli
@@ -927,7 +943,7 @@
         var elapsed = timestamp - startTime;
         var rawProgress = Math.min(elapsed / CONFIG.SPIN_DURATION, 1);
 
-        var eased = easeOutQuart(rawProgress);
+        var eased = easeOutExpo(rawProgress);
 
         if (rawProgress >= 1) {
           // === FIN : ARRÊTER LE SON ===
@@ -993,27 +1009,7 @@
       requestAnimationFrame(step);
     });
   }
-  // /**
-  //  * Fait "rebondir" un angle pour qu'il reste dans [0, 180].
-  //  * Comme une balle de ping-pong entre deux murs.
-  //  *
-  //  * 0 → 180 → 0 → 180 → ...
-  //  *
-  //  * @param {number} angle - angle brut (peut dépasser 180 ou être négatif)
-  //  * @returns {number} angle entre 0 et 180
-  //  */
-  // function pingPongAngle(angle) {
-  //   var a = Math.abs(angle);
-  //   var period = 180;
-  //   var cycles = Math.floor(a / period);
-  //   var remainder = a - cycles * period;
 
-  //   if (cycles % 2 === 0) {
-  //     return remainder;
-  //   } else {
-  //     return period - remainder;
-  //   }
-  // }
   // --- FIN PARTIE E ---
   // ===== PARTIE F — CALCUL ORDRE FINAL + LANCEMENT SYNCHRONISÉ =====
 
@@ -1084,8 +1080,8 @@
         CONFIG.BOULE_COUNT) %
       CONFIG.BOULE_COUNT;
 
-    // Ajouter 1 tour complet minimum pour que la rotation soit visible
-    var totalSteps = directShift + CONFIG.BOULE_COUNT;
+    // ← MODIFIÉ : 3 tours complets au lieu de 1 (était + CONFIG.BOULE_COUNT)
+    var totalSteps = directShift + CONFIG.BOULE_COUNT * 5;
 
     // Construire le nouvel ordre par décalage circulaire
     // Un shift de N signifie : chaque boule avance de N positions
@@ -1423,29 +1419,78 @@
   function highlightWinnerCell(winnerData) {
     if (!winnerData) return;
 
-    // Nettoyer le highlight précédent
     clearHighlight();
 
-    // Trouver la cellule
-    var cell = findWinnerCell(winnerData.number);
-    if (!cell) return;
+    var number = winnerData.number;
+    var type = winnerData.type; // "rouge" | "noire" | "jaune"
 
-    // Ajouter la classe de highlight
-    cell.classList.add("cell-winner-highlight");
+    // ── Cas JAUNE ──────────────────────────────────────────────
+    if (type === "jaune") {
+      var tdJaune =
+        document.querySelector(".losange-jaune") &&
+        document.querySelector(".losange-jaune").closest("td");
+      if (tdJaune) {
+        tdJaune.classList.add("cell-winner-highlight");
+        var lj = tdJaune.querySelector(".losange-jaune");
+        if (lj) lj.classList.add("losange-winner-highlight");
+      }
+      // OVER / UNDER highlight
+      if (number >= 5 && number <= 8) {
+        var overCell = document.querySelector('[data-bet="over"]');
+        if (overCell && miseState.bets.has(overCell)) {
+          overCell.classList.add("cell-winner-highlight");
+        }
+      } else if (number >= 1 && number <= 4) {
+        var underCell = document.querySelector('[data-bet="under"]');
+        if (underCell && miseState.bets.has(underCell)) {
+          underCell.classList.add("cell-winner-highlight");
+        }
+      }
+      scheduleHighlightClear();
+      return;
+    }
 
-    // Pour le losange jaune, on ajoute aussi une classe sur le losange lui-même
-    if (winnerData.number === 0) {
-      var losange = cell.querySelector(".losange-jaune");
-      if (losange) {
-        losange.classList.add("losange-winner-highlight");
+    // ── Cas ROUGE ou NOIRE ────────────────────────────────────
+
+    // 1. Case numéro de la boule
+    var numCell = findWinnerCell(number);
+    if (numCell) numCell.classList.add("cell-winner-highlight");
+
+    // 2. Losange selon couleur
+    if (type === "rouge") {
+      var tdRouge =
+        document.querySelector(".losange-rouge") &&
+        document.querySelector(".losange-rouge").closest("td");
+      if (tdRouge) {
+        tdRouge.classList.add("cell-winner-highlight");
+        var lr = tdRouge.querySelector(".losange-rouge");
+        if (lr) lr.classList.add("losange-winner-highlight");
+      }
+    } else if (type === "noire") {
+      var tdGris =
+        document.querySelector(".losange-gris") &&
+        document.querySelector(".losange-gris").closest("td");
+      if (tdGris) {
+        tdGris.classList.add("cell-winner-highlight");
+        var lg = tdGris.querySelector(".losange-gris");
+        if (lg) lg.classList.add("losange-winner-highlight");
       }
     }
 
-    // Retirer le highlight après 5 secondes (assez pour être visible,
-    // mais nettoyé avant le prochain tour)
-    setTimeout(function () {
-      clearHighlight();
-    }, 5000);
+    // 3. Parité (number 0 = jaune, déjà traité plus haut)
+    if (number > 0) {
+      var isEven = number % 2 === 0;
+      var betSide = isEven ? "pair" : "impair";
+      var pariteCell = document.querySelector('[data-bet="' + betSide + '"]');
+      if (pariteCell) pariteCell.classList.add("cell-winner-highlight");
+    }
+
+    scheduleHighlightClear();
+  }
+
+  /** Programme le nettoyage automatique du highlight après 5 s. */
+  function scheduleHighlightClear() {
+    setTimeout(clearHighlight, 5000);
   }
 
   /**
@@ -1482,7 +1527,11 @@
   var miseState = {
     bets: new Map(),
     bettingOpen: false,
-    lockedLosange: null,
+    lockedGroups: {
+      losange: null,
+      overunder: null,
+      parite: null,
+    },
     selectedJetonValue: null,
     selectedJetonImg: null,
     messageEl: null,
@@ -1528,7 +1577,9 @@
       }
     });
     miseState.bets.clear();
-    miseState.lockedLosange = null;
+    miseState.lockedGroups.losange = null;
+    miseState.lockedGroups.overunder = null;
+    miseState.lockedGroups.parite = null;
     miseState.selectedJetonValue = null;
     miseState.selectedJetonImg = null;
 
@@ -1614,9 +1665,8 @@
       // Mettre à jour l'élément existant
       chipEl = existing.chipEl;
       var amountLabel = chipEl.querySelector(".chip-amount");
-      if (amountLabel) {
-        amountLabel.textContent = totalAmount;
-      }
+      if (amountLabel)
+        amountLabel.textContent = totalAmount.toLocaleString() + " FCFA";
       // Animation de "bump" pour montrer l'ajout
       chipEl.classList.remove("chip-bump");
       void chipEl.offsetWidth;
@@ -1634,7 +1684,7 @@
 
       var label = document.createElement("span");
       label.className = "chip-amount";
-      label.textContent = totalAmount;
+      label.textContent = totalAmount.toLocaleString() + " FCFA";
       chipEl.appendChild(label);
 
       // Positionner sur la cellule
@@ -1670,11 +1720,11 @@
     var jeton = getSelectedJeton();
     if (!jeton) return;
 
-    // 3. Vérifier la contrainte losanges rouge/gris
-    var losangeType = getLosangeType(cell);
-    if (losangeType) {
-      if (miseState.lockedLosange && miseState.lockedLosange !== losangeType) {
-        // L'autre losange est verrouillé → bloquer
+    // 3. Vérifier les contraintes exclusives (losanges, over/under, impair/pair)
+    var exclusiveInfo = getExclusiveGroup(cell);
+    if (exclusiveInfo) {
+      var currentLock = miseState.lockedGroups[exclusiveInfo.group];
+      if (currentLock && currentLock !== exclusiveInfo.side) {
         shakeCell(cell);
         return;
       }
@@ -1694,51 +1744,75 @@
     // 5. Placer la mise
     var chipEl = renderChipOnCell(cell, newAmount, jeton.src);
     miseState.bets.set(cell, { amount: newAmount, chipEl: chipEl });
+    // ===== NOUVEAU : Son de placement =====
+    try {
+      var betSound = new Audio("./assets/son/bet.mp3");
+      betSound.volume = 0.7;
+      betSound.play().catch(function () {
+        // Autoplay bloqué — silencieux
+      });
+    } catch (e) {}
+    // ===== FIN NOUVEAU =====
 
-    // 6. Verrouiller le losange opposé si nécessaire
-    if (losangeType) {
-      miseState.lockedLosange = losangeType;
-      updateLosangeLock();
+    // 6. Verrouiller l'opposé si c'est une paire exclusive
+    if (exclusiveInfo) {
+      miseState.lockedGroups[exclusiveInfo.group] = exclusiveInfo.side;
+      updateAllLocks();
     }
   }
 
   /**
-   * Détermine si une cellule contient un losange rouge ou gris.
+   * Identifie à quel groupe exclusif appartient une cellule.
    *
-   * @param {HTMLElement} cell - la cellule <td>
-   * @returns {string|null} "rouge", "gris", ou null
+   * @param {HTMLElement} cell
+   * @returns {{ group: string, side: string } | null}
    */
-  function getLosangeType(cell) {
-    if (cell.querySelector(".losange-rouge")) return "rouge";
-    if (cell.querySelector(".losange-gris")) return "gris";
+  function getExclusiveGroup(cell) {
+    // Losanges
+    if (cell.querySelector(".losange-rouge"))
+      return { group: "losange", side: "rouge" };
+    if (cell.querySelector(".losange-gris"))
+      return { group: "losange", side: "gris" };
+
+    // Over/Under et Impair/Pair via data-bet
+    var dataBet = cell.getAttribute("data-bet");
+    if (dataBet) {
+      switch (dataBet) {
+        case "over":
+          return { group: "overunder", side: "over" };
+        case "under":
+          return { group: "overunder", side: "under" };
+        case "impair":
+          return { group: "parite", side: "impair" };
+        case "pair":
+          return { group: "parite", side: "pair" };
+      }
+    }
+
     return null;
   }
 
   /**
-   * Met à jour le verrouillage visuel des losanges.
-   * Si un losange est misé, l'autre est visuellement verrouillé.
+   * Met à jour le verrouillage visuel de toutes les paires exclusives.
    */
-  function updateLosangeLock() {
-    var losangeRouge = document.querySelector(".losange-rouge");
-    var losangeGris = document.querySelector(".losange-gris");
+  function updateAllLocks() {
+    var groups = ["losange", "overunder", "parite"];
+    var allCells = document.querySelectorAll(".table-outer-border td");
 
-    if (!losangeRouge || !losangeGris) return;
+    for (var g = 0; g < groups.length; g++) {
+      var groupName = groups[g];
+      var lockedSide = miseState.lockedGroups[groupName];
 
-    var cellRouge = losangeRouge.closest("td");
-    var cellGris = losangeGris.closest("td");
-
-    if (miseState.lockedLosange === "rouge") {
-      // Rouge misé → gris verrouillé
-      if (cellGris) cellGris.classList.add("cell-locked");
-      if (cellRouge) cellRouge.classList.remove("cell-locked");
-    } else if (miseState.lockedLosange === "gris") {
-      // Gris misé → rouge verrouillé
-      if (cellRouge) cellRouge.classList.add("cell-locked");
-      if (cellGris) cellGris.classList.remove("cell-locked");
-    } else {
-      // Aucun verrouillage
-      if (cellRouge) cellRouge.classList.remove("cell-locked");
-      if (cellGris) cellGris.classList.remove("cell-locked");
+      for (var i = 0; i < allCells.length; i++) {
+        var info = getExclusiveGroup(allCells[i]);
+        if (info && info.group === groupName) {
+          if (lockedSide && info.side !== lockedSide) {
+            allCells[i].classList.add("cell-locked");
+          } else {
+            allCells[i].classList.remove("cell-locked");
+          }
+        }
+      }
     }
   }
 
@@ -1791,7 +1865,7 @@
     if (trashBtn) {
       trashBtn.addEventListener("click", function () {
         clearAllBets();
-        updateLosangeLock();
+        updateAllLocks();
       });
     }
     // Bouton undo : rejouer les mises précédentes
@@ -1898,14 +1972,14 @@
       miseState.bets.set(cell, { amount: bet.amount, chipEl: chipEl });
 
       // Gérer le verrouillage losange
-      var losangeType = getLosangeType(cell);
-      if (losangeType) {
-        miseState.lockedLosange = losangeType;
+      var exclusiveInfo = getExclusiveGroup(cell);
+      if (exclusiveInfo) {
+        miseState.lockedGroups[exclusiveInfo.group] = exclusiveInfo.side;
       }
     }
 
     // Mettre à jour le verrouillage visuel
-    updateLosangeLock();
+    updateAllLocks();
 
     console.log(
       "🔄 Mises précédentes rejouées (" + previousBets.length + " cases)",
