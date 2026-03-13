@@ -113,7 +113,7 @@ main {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding-bottom: 100px;
+  /* padding-bottom: 50px; */
 }
 
 .main-header {
@@ -129,8 +129,8 @@ main {
   margin: 0 auto;
   margin-top: -50px;
   /* filter: drop-shadow(0 0 12px rgba(255, 200, 50, 0.5)); */
- 
-  margin-right: -12px;   //**** Decalage vers la droite pour compenser le padding du main et centrer visuellement l'image */
+
+  margin-right: -12px;
   /* display: block; */
 }
 
@@ -147,7 +147,7 @@ main {
   min-height: 200px;
   /* margin-left: 20px;
   margin-right: 20px; */
-  margin-top: -5px;
+  /* margin-top: -5px; */
 }
 
 .middle-bg {
@@ -165,13 +165,13 @@ main {
 .middle-logo {
   position: relative;
   z-index: 2;
-  width: 90%;
+  width: 92%;
   object-fit: contain;
   filter: drop-shadow(0 4px 15px rgba(0, 0, 0, 0.7));
   pointer-events: none;
   user-select: none;
   margin-top: 80px;
-  margin-bottom: 10px;
+  /* margin-bottom: 10px; */
   overflow: visible;
 }
 
@@ -212,6 +212,12 @@ main {
 .table-outer-border td:hover,
 .table-outer-border th:hover {
   filter: brightness(1.2);
+}
+
+.cell-noir:hover {
+  background: #2a2a2a !important;
+  box-shadow: inset 0 0 18px 4px rgba(159, 161, 161, 0.048);
+  filter: none;
 }
 
 /* ========================================
@@ -572,108 +578,9 @@ main {
 }
 
 /* ========================================
-   RESPONSIVE (Modifications Majeures Mobile)
-   ======================================== */
-@media (max-width: 700px) {
-  /* --- 1. HISTORIQUE TRÈS MINCE --- */
-  .historique {
-    width: 50px; /* Très mince */
-    min-width: 50px;
-    padding: 10px 2px;
-  }
-
-  /* Masquer le texte "Historique" et afficher l'Emoji */
-  .desktop-text {
-    display: none;
-  }
-  .mobile-text {
-    display: block;
-    font-size: 1.5rem; /* Taille de l'émoji */
-  }
-
-  /* Réduire la taille des ID et des boules */
-  .historique-id {
-    font-size: 0.5rem;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    max-width: 100%;
-  }
-  .boule {
-    width: 32px;
-    height: 32px;
-  }
-
-  /* --- 2. MAIN & HAMBURGER --- */
-  main {
-    /* Main prend tout l'espace restant après les 50px de l'historique */
-    width: calc(100% - 50px);
-    max-width: none;
-  }
-
-  .main-header {
-    /* Ajout d'un padding en haut pour que le hamburger ne soit pas SUR l'image */
-    /* padding-top: 55px; */
-    padding-bottom: 0;
-    width: 100%;
-    /* On force une hauteur ou min-hauteur pour occuper l'espace */
-    height: 25vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .jackpot-img {
-    width: 95%;
-    height: 100%;
-    object-fit: contain; /* L'image s'adapte sans être déformée */
-  }
-
-  /* --- 3. SECTION MIDDLE IDENTIQUE AU HEADER --- */
-  .section-middle {
-    height: 25vh; /*Même hauteur que le header
-    min-height: auto; /* Annule le min-height desktop */
-    margin-top: 0;
-  }
-
-  .middle-logo {
-    width: 60%;
-    max-width: none;
-    /* margin-top: 0; Centré verticalement */
-  }
-
-  /* --- 4. BOUTON HAMBURGER --- */
-  .hamburger {
-    top: 5px; /* Collé en haut */
-    right: 5px; /* Collé à droite */
-    /* On s'assure qu'il est visible sur le fond vert foncé du body/header */
-    background: rgba(0, 61, 30, 0.9);
-  }
-
-  /* --- 5. RESTE DU CONTENU (Tableau et Footer) --- */
-  .section-bottom {
-    width: calc(100% - 10px);
-    margin: 5px auto 20px auto;
-    padding: 4px;
-  }
-  .cell-num {
-    font-size: 2rem;
-    height: 45px;
-  }
-  .losange-plat {
-    width: 60px;
-    height: 28px;
-  }
-  .jeton {
-    width: 40px;
-    height: 40px;
-  }
-}
-/* ========================================
    HIGHLIGHT CASE GAGNANTE
    ======================================== */
 
-/* REMPLACER winner-pulse entier par : */
 @keyframes winner-pulse {
   0% {
     box-shadow: inset 0 0 0 0 rgba(180, 235, 255, 0);
@@ -698,17 +605,6 @@ main {
   }
 }
 
-/* Cellule gagnante (chiffres 1-8 et cellule du losange jaune) */
-.cell-winner-highlight {
-  animation: winner-pulse 2s ease-in-out forwards;
-  outline: 3px solid #ffd700;
-  outline-offset: -3px;
-  position: relative;
-  z-index: 5;
-}
-
-/* Renforcement pour les cases numériques (rouge/noir) */
-/* REMPLACER cell-num.cell-winner-highlight par : */
 .cell-winner-highlight {
   animation: winner-pulse 2s ease-in-out forwards;
   outline: 3px solid #b4ebff;
@@ -717,7 +613,6 @@ main {
   z-index: 5;
 }
 
-/* Highlight spécifique pour le losange jaune quand il gagne */
 @keyframes losange-winner-glow {
   0% {
     filter: brightness(1) drop-shadow(0 0 0px rgba(180, 235, 255, 0));
@@ -745,7 +640,6 @@ main {
    JETONS SUR LE TABLEAU
    ======================================== */
 
-/* Jeton placé sur une case — positionné à DROITE du chiffre */
 .table-chip {
   position: absolute;
   top: 50%;
@@ -811,15 +705,10 @@ main {
   animation: chip-bump 0.35s ease forwards;
 }
 
-.table-chip.chip-bump {
-  animation: chip-bump 0.35s ease forwards;
-}
-
 /* ========================================
    FENÊTRE DE MISE OUVERTE
    ======================================== */
 
-/* Bordure lumineuse quand les mises sont ouvertes */
 .table-outer-border.betting-open {
   box-shadow: 0 0 15px 3px rgba(0, 255, 100, 0.4);
   border-color: #00ff64;
@@ -915,10 +804,175 @@ main {
   margin-bottom: 8px;
 }
 
+/* Forcer le verrouillage sur la dernière ligne du tableau */
+.table-outer-border table tr:last-child td.cell-locked {
+  opacity: 0.35 !important;
+  pointer-events: none !important;
+  position: relative;
+}
+
+.table-outer-border table tr:last-child td.cell-locked::after {
+  content: "🔒";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 1.5rem;
+  z-index: 15;
+}
+
 /* ========================================
-   RESPONSIVE — JETONS TABLEAU
+   RESPONSIVE ≤ 700px
    ======================================== */
 @media (max-width: 700px) {
+  /* --- HISTORIQUE MINCE --- */
+  .historique {
+    width: 50px;
+    min-width: 50px;
+    padding: 10px 2px;
+  }
+
+  .desktop-text {
+    display: none;
+  }
+  .mobile-text {
+    display: block;
+    font-size: 1.5rem;
+  }
+
+  .historique-id {
+    font-size: 0.5rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 100%;
+  }
+
+  .boule {
+    width: 32px;
+    height: 32px;
+  }
+
+  /* --- MAIN --- */
+  main {
+    width: calc(100% - 50px);
+    max-width: none;
+    overflow-x: hidden;
+    /* padding-bottom: 75px; */
+  }
+
+  /* --- HEADER ---
+     CORRECTIF CLÉ : annule les marges négatives desktop
+     qui provoquent le chevauchement avec section-middle
+  ------------------------------------------------- */
+  .main-header {
+    padding: 0;
+    width: 100%;
+    height: auto;
+    min-height: unset;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: visible;
+  }
+
+  .jackpot-img {
+    margin-top: 0; /* ANNULE le -50px desktop */
+    margin-right: 0; /* ANNULE le -12px desktop */
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  /* --- SECTION MIDDLE ---
+     CORRECTIF CLÉ : annule le margin-top: 80px du logo
+     et aligne la largeur sur section-bottom
+  ------------------------------------------------- */
+  .section-middle {
+    width: 100%;
+    min-height: unset;
+    height: auto;
+    margin-top: 0;
+    padding: 0;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: visible;
+  }
+
+  .middle-bg {
+    top: 0; /* ANNULE le -10px desktop */
+    height: 85%;
+  }
+
+  /* RÈGLE PRINCIPALE : même largeur que .section-bottom */
+  .middle-logo {
+    width: calc(100% - 10px); /* = section-bottom width */
+    margin-top: 0; /* ANNULE le 80px desktop */
+    max-width: none;
+    overflow: visible;
+  }
+
+  /* --- SECTION BOTTOM ---
+     Légèrement moins aplati qu'avant
+  ------------------------------------------------- */
+  .section-bottom {
+    width: calc(100% - 10px);
+    margin: 6px auto 80px auto;
+    padding: 5px;
+  }
+
+  .cell-num {
+    font-size: 2rem;
+    height: 44px;
+  }
+
+  .cell-text {
+    font-size: 1.1rem;
+    letter-spacing: 1.5px;
+    padding: 8px 4px;
+  }
+
+  .table-outer-border table tr:last-child td {
+    height: 44px;
+    padding: 10px 4px;
+    font-size: 0.85rem;
+  }
+
+  .cell-losange-container {
+    padding: 10px 4px;
+  }
+
+  .losange {
+    width: 62px;
+    height: 62px;
+  }
+
+  .losange-jaune {
+    width: 85px;
+    height: 85px;
+  }
+
+  .losange-plat {
+    width: 65px;
+    height: 28px;
+  }
+
+  /* --- JETONS FOOTER --- */
+  .jeton {
+    width: 40px;
+    height: 40px;
+  }
+
+  /* --- HAMBURGER --- */
+  .hamburger {
+    top: 5px;
+    right: 5px;
+    background: rgba(0, 61, 30, 0.9);
+  }
+
+  /* --- CHIPS SUR TABLEAU --- */
   .table-chip-img {
     width: 24px;
     height: 24px;
@@ -939,19 +993,222 @@ main {
     padding: 14px 20px;
   }
 }
-/* Forcer le verrouillage sur la dernière ligne du tableau */
-.table-outer-border table tr:last-child td.cell-locked {
-  opacity: 0.35 !important;
-  pointer-events: none !important;
-  position: relative;
+
+/* ========================================
+   RESPONSIVE ≤ 490px
+   ======================================== */
+@media (max-width: 490px) {
+  /* Header : taille correcte, on maintient son comportement */
+  .main-header {
+    height: auto;
+    min-height: unset;
+  }
+
+  .jackpot-img {
+    margin-top: 0;
+    margin-right: 0;
+    width: 100%;
+    height: auto;
+  }
+
+  /* Section middle : le logo est un peu trop grand,
+     on le contient dans son espace sans déborder */
+  .section-middle {
+    height: auto;
+    min-height: unset;
+    overflow: visible;
+    padding-bottom: 0;
+  }
+
+  .middle-bg {
+    top: 0;
+    height: 80%;
+  }
+
+  /* RÈGLE PRINCIPALE : même largeur que .section-bottom */
+  .middle-logo {
+    width: calc(100% - 10px);
+    margin-top: 0;
+    overflow: visible;
+  }
+
+  /* Section bottom : conserver tel quel (≤700px déjà OK) */
+  .section-bottom {
+    width: calc(100% - 10px);
+    margin-bottom: 80px;
+  }
+
+  .cell-num {
+    font-size: 1.9rem;
+    height: 42px;
+  }
 }
 
-.table-outer-border table tr:last-child td.cell-locked::after {
-  content: "🔒";
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  font-size: 1.5rem;
-  z-index: 15;
+/* ========================================
+   RESPONSIVE ≤ 440px
+   ======================================== */
+@media (max-width: 440px) {
+  /* Header : le SVG doit rester en haut et ne pas rétrécir
+     On fixe une hauteur minimale pour l'ancrer
+  ------------------------------------------------- */
+  .main-header {
+    height: auto;
+    min-height: unset;
+    flex-shrink: 0;
+  }
+
+  .jackpot-img {
+    width: 100%;
+    margin-top: 0;
+    margin-right: 0;
+    height: auto;
+    /* Hauteur minimale pour que le header occupe bien le haut */
+    min-height: 72px;
+    flex-shrink: 0;
+  }
+
+  /* Section middle */
+  .section-middle {
+    height: auto;
+    min-height: unset;
+    flex-shrink: 0;
+    overflow: visible;
+  }
+
+  .middle-bg {
+    height: 75%;
+  }
+
+  /* RÈGLE PRINCIPALE : même largeur que .section-bottom */
+  .middle-logo {
+    width: calc(100% - 10px);
+    margin-top: 0;
+    overflow: visible;
+  }
+
+  /* Légère réduction du tableau */
+  .cell-num {
+    font-size: 1.75rem;
+    height: 40px;
+  }
+
+  .cell-text {
+    font-size: 1rem;
+    letter-spacing: 1px;
+    padding: 6px 3px;
+  }
+
+  .table-outer-border table tr:last-child td {
+    height: 40px;
+    padding: 8px 3px;
+    font-size: 0.8rem;
+  }
+
+  .losange-jaune {
+    width: 75px;
+    height: 75px;
+  }
+
+  .losange {
+    width: 55px;
+    height: 55px;
+  }
+
+  .losange-plat {
+    width: 58px;
+    height: 24px;
+  }
+
+  .cell-losange-container {
+    padding: 8px 3px;
+  }
+
+  .jeton {
+    width: 36px;
+    height: 36px;
+  }
+}
+
+/* ========================================
+   RESPONSIVE ≤ 350px
+   ======================================== */
+@media (max-width: 350px) {
+  /* Header : maintenir la présence en haut de page */
+  .jackpot-img {
+    width: 100%;
+    margin-top: 0;
+    margin-right: 0;
+    min-height: 60px;
+  }
+
+  /* RÈGLE PRINCIPALE : même largeur que .section-bottom */
+  .middle-logo {
+    width: calc(100% - 10px);
+    margin-top: 0;
+  }
+
+  .middle-bg {
+    height: 70%;
+  }
+
+  /* Réductions fines du tableau */
+  .cell-num {
+    font-size: 1.5rem;
+    height: 36px;
+  }
+
+  .cell-text {
+    font-size: 0.88rem;
+    letter-spacing: 0.5px;
+    padding: 5px 2px;
+  }
+
+  .table-outer-border table tr:last-child td {
+    height: 34px;
+    padding: 6px 2px;
+    font-size: 0.75rem;
+  }
+
+  .cell-losange-container {
+    padding: 6px 2px;
+  }
+
+  .losange-jaune {
+    width: 62px;
+    height: 62px;
+  }
+
+  .losange {
+    width: 48px;
+    height: 48px;
+  }
+
+  .losange-plat {
+    width: 50px;
+    height: 22px;
+  }
+
+  .jeton {
+    width: 32px;
+    height: 32px;
+  }
+
+  .footer {
+    gap: 6px;
+    padding: 6px 8px;
+  }
+
+  .footer-btn {
+    padding: 6px;
+  }
+
+  .hamburger {
+    top: 4px;
+    right: 4px;
+    padding: 7px;
+  }
+
+  .hamburger-line {
+    width: 20px;
+  }
 }
