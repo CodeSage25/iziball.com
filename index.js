@@ -104,7 +104,7 @@
   var CONFIG = {
     // Durées (ms)
     FILL_DURATION: 20000, // durée du remplissage (20 secondes)
-    SPIN_DURATION: 5500, // durée de la rotation
+    SPIN_DURATION: 7500, // durée de la rotation
     GLOW_DURATION: 3000, // durée de la lueur gagnante
     PAUSE_AFTER_FILL: 200, // pause entre remplissage et rotation
     FADE_OUT_FILL: 500, // durée du fondu de disparition du remplissage
@@ -1081,7 +1081,7 @@
       CONFIG.BOULE_COUNT;
 
     // ← MODIFIÉ : 3 tours complets au lieu de 1 (était + CONFIG.BOULE_COUNT)
-    var totalSteps = directShift + CONFIG.BOULE_COUNT * 5;
+    var totalSteps = directShift + CONFIG.BOULE_COUNT * 10;
 
     // Construire le nouvel ordre par décalage circulaire
     // Un shift de N signifie : chaque boule avance de N positions

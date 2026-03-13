@@ -120,14 +120,18 @@ main {
   width: 100%;
   text-align: center;
   padding: 0px 10px 8px;
+  margin: 0 auto;
 }
 
 .jackpot-img {
   max-width: 100%;
   height: auto;
-  margin-top: -40px;
+  margin: 0 auto;
+  margin-top: -50px;
   filter: drop-shadow(0 0 12px rgba(255, 200, 50, 0.5));
   margin-bottom: 20px;
+  margin-right: -12px;   //**** Decalage vers la droite pour compenser le padding du main et centrer visuellement l'image */
+  /* display: block; */
 }
 
 /* ========================================
