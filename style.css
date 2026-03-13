@@ -128,8 +128,8 @@ main {
   height: auto;
   margin: 0 auto;
   margin-top: -50px;
-  filter: drop-shadow(0 0 12px rgba(255, 200, 50, 0.5));
-  margin-bottom: 20px;
+  /* filter: drop-shadow(0 0 12px rgba(255, 200, 50, 0.5)); */
+ 
   margin-right: -12px;   //**** Decalage vers la droite pour compenser le padding du main et centrer visuellement l'image */
   /* display: block; */
 }
@@ -147,6 +147,7 @@ main {
   min-height: 200px;
   /* margin-left: 20px;
   margin-right: 20px; */
+  margin-top: -5px;
 }
 
 .middle-bg {
