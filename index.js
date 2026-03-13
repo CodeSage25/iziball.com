@@ -144,6 +144,7 @@
     currentOrder: [0, 1, 2, 3, 4, 5, 6, 7, 8], // ordre actuel des boules sur les 9 positions
     winnerBouleId: null, // id de la boule gagnante (ex: "boule-3"), paramétrable
     spinCounter: 0, // compteur de tours pour l'historique
+    balance: 50000,
   };
 
   // ===== RÉFÉRENCES SVG =====
@@ -1528,7 +1529,65 @@
     messageTimeout: null,
     MAX_BET_PER_CELL: 10000,
   };
+  // ===== SOLDE — AFFICHAGE ET ANIMATION =====
 
+  function formatBalance(n) {
+    return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+  }
+
+  function updateBalanceDisplay() {
+    var el = document.getElementById("solde-display");
+    if (!el) return;
+    el.textContent = formatBalance(state.balance);
+  }
+
+  function shakeBalance() {
+    var el = document.getElementById("solde-display");
+    if (!el) return;
+    // Flash rouge + secousse
+    el.setAttribute("fill", "#ff4444");
+    var shakeAnim = [
+      { offset: 0, value: "246" },
+      { offset: 0.15, value: "249" },
+      { offset: 0.3, value: "243" },
+      { offset: 0.45, value: "248" },
+      { offset: 0.6, value: "244" },
+      { offset: 0.75, value: "247" },
+      { offset: 1, value: "246" },
+    ];
+    var startTime = null;
+    var duration = 400;
+
+    function step(ts) {
+      if (!startTime) startTime = ts;
+      var progress = Math.min((ts - startTime) / duration, 1);
+      // Interpolation simple
+      for (var i = 0; i < shakeAnim.length - 1; i++) {
+        if (
+          progress >= shakeAnim[i].offset &&
+          progress <= shakeAnim[i + 1].offset
+        ) {
+          var t =
+            (progress - shakeAnim[i].offset) /
+            (shakeAnim[i + 1].offset - shakeAnim[i].offset);
+          var x =
+            parseFloat(shakeAnim[i].value) +
+            t *
+              (parseFloat(shakeAnim[i + 1].value) -
+                parseFloat(shakeAnim[i].value));
+          el.setAttribute("x", x.toFixed(1));
+          break;
+        }
+      }
+      if (progress < 1) {
+        requestAnimationFrame(step);
+      } else {
+        el.setAttribute("x", "246");
+        el.setAttribute("fill", "#fff");
+      }
+    }
+    requestAnimationFrame(step);
+  }
   /**
    * Ouvre la fenêtre de mise (appelé quand le remplissage commence).
    */
@@ -1560,13 +1619,18 @@
    * Nettoie toutes les mises visuelles et l'état après un tour.
    * Déverrouille aussi tous les losanges.
    */
+  // APRÈS
   function clearAllBets() {
+    // Rembourser toutes les mises au solde
     miseState.bets.forEach(function (betData, cell) {
+      state.balance += betData.amount;
       if (betData.chipEl && betData.chipEl.parentNode) {
         betData.chipEl.parentNode.removeChild(betData.chipEl);
       }
     });
+    updateBalanceDisplay();
     miseState.bets.clear();
+    // ... reste inchangé
     miseState.lockedGroups.losange = null;
     miseState.lockedGroups.overunder = null;
     miseState.lockedGroups.parite = null;
@@ -1720,20 +1784,29 @@
       }
     }
 
+    // APRÈS
     // 4. Vérifier la limite de mise
     var currentBet = miseState.bets.get(cell);
     var currentAmount = currentBet ? currentBet.amount : 0;
     var newAmount = currentAmount + jeton.value;
 
     if (newAmount > miseState.MAX_BET_PER_CELL) {
-      // Limite atteinte → retour visuel
       shakeCell(cell);
       return;
     }
 
-    // 5. Placer la mise
+    // 4b. Vérifier le solde disponible
+    if (jeton.value > state.balance) {
+      shakeBalance();
+      shakeCell(cell);
+      return;
+    }
+
+    // 5. Placer la mise + déduire du solde
     var chipEl = renderChipOnCell(cell, newAmount, jeton.src);
     miseState.bets.set(cell, { amount: newAmount, chipEl: chipEl });
+    state.balance -= jeton.value;
+    updateBalanceDisplay();
     // ===== NOUVEAU : Son de placement =====
     try {
       var betSound = new Audio("./assets/son/bet.mp3");
