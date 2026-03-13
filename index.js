@@ -2101,4 +2101,3 @@
     init();
   }
 })();
-// Les parties suivantes seront collées ICI, avant la fermeture })();
