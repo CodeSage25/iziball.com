@@ -158,6 +158,17 @@
 
   var svgNS = "http://www.w3.org/2000/svg";
 
+  // ===== SON DE ROULETTE PRÉ-CHARGÉ =====
+  var rouletteSound = null;
+
+  function preloadRouletteSound() {
+    rouletteSound = new Audio("./assets/son/roulette.mp3");
+    rouletteSound.loop = true;
+    rouletteSound.volume = 0.6;
+    rouletteSound.preload = "auto";
+    rouletteSound.load();
+  }
+
   // ===== FONCTION PUBLIQUE : setWinner =====
   // Appeler setWinner("boule-3") pour que la boule 3 arrive au centre
   // Si non appelée ou null, une boule aléatoire est choisie
@@ -855,32 +866,19 @@
   function animateRotation(startOrder, endOrder, totalSteps) {
     return new Promise(function (resolve) {
       var startTime = null;
-      var spacing = 180 / (CONFIG.BOULE_COUNT - 1); // 22.5°
-      var cycle = CONFIG.BOULE_COUNT * spacing; // 202.5°
+      var spacing = 180 / (CONFIG.BOULE_COUNT - 1);
+      var cycle = CONFIG.BOULE_COUNT * spacing;
 
-      // === SON DE ROULETTE ===
-      var rouletteSound = new Audio("./assets/son/roulette.mp3");
-      rouletteSound.loop = true;
-      rouletteSound.volume = 0.6;
-
-      // Démarrer le son (avec gestion du autoplay bloqué par le navigateur)
-      var soundStarted = false;
-      try {
-        var playPromise = rouletteSound.play();
-        if (playPromise !== undefined) {
-          playPromise
-            .then(function () {
-              soundStarted = true;
-            })
-            .catch(function () {
-              // Autoplay bloqué — on ignore silencieusement
-              console.log(
-                "🔇 Son bloqué par le navigateur (interaction requise)",
-              );
-            });
-        }
-      } catch (e) {
-        // Fallback silencieux
+      // === SON : DÉMARRER IMMÉDIATEMENT (déjà préchargé) ===
+      if (rouletteSound) {
+        rouletteSound.currentTime = 0;
+        rouletteSound.volume = 0.6;
+        rouletteSound.loop = true;
+        try {
+          rouletteSound.play().catch(function () {
+            console.log("🔇 Son bloqué par le navigateur");
+          });
+        } catch (e) {}
       }
 
       // Fonction pour arrêter le son proprement avec un fondu
@@ -888,7 +886,7 @@
         if (!rouletteSound) return;
 
         var fadeStart = rouletteSound.volume;
-        var fadeDuration = 500; // 500ms de fondu
+        var fadeDuration = 500;
         var fadeStartTime = performance.now();
 
         function fadeStep() {
@@ -902,7 +900,7 @@
           } else {
             rouletteSound.pause();
             rouletteSound.currentTime = 0;
-            rouletteSound.volume = fadeStart;
+            rouletteSound.volume = 0.6;
           }
         }
 
@@ -912,24 +910,21 @@
       // === CALCUL DU SWEEP ===
       var totalSweep = totalSteps * spacing;
 
-      // Angles de départ pour chaque boule
       var startAngles = [];
       for (var i = 0; i < CONFIG.BOULE_COUNT; i++) {
         var posIdx = startOrder.indexOf(i);
         startAngles.push(getPositionAngle(posIdx));
       }
 
-      // Angles d'arrivée EXACTS depuis endOrder
       var endAngles = [];
       for (var j = 0; j < CONFIG.BOULE_COUNT; j++) {
         var endPosIdx = endOrder.indexOf(j);
         endAngles.push(getPositionAngle(endPosIdx));
       }
 
-      // Correction du sweep pour cohérence avec la boule gagnante
       var winnerIdx = endOrder[4];
       var winnerStart = startAngles[winnerIdx];
-      var winnerEnd = endAngles[winnerIdx]; // = 90° (position 4)
+      var winnerEnd = endAngles[winnerIdx];
 
       var baseDiff = winnerEnd - winnerStart;
       var correctedSweep = baseDiff;
@@ -946,12 +941,8 @@
         var eased = easeOutExpo(rawProgress);
 
         if (rawProgress >= 1) {
-          // === FIN : ARRÊTER LE SON ===
           stopSound();
 
-          // === FIN : POSITIONS FINALES EXACTES ===
-          // Recalculer chaque position proprement depuis endOrder
-          // pour garantir un placement parfait sur l'arc
           for (var b = 0; b < CONFIG.BOULE_COUNT; b++) {
             var finalPosIdx = endOrder.indexOf(b);
             var finalAngle = getPositionAngle(finalPosIdx);
@@ -974,7 +965,6 @@
           return;
         }
 
-        // === PENDANT LA ROTATION ===
         var currentSweep = totalSweep * eased;
 
         for (var b = 0; b < CONFIG.BOULE_COUNT; b++) {
@@ -2049,6 +2039,12 @@
 
     // 2. Defs (filtre glow)
     createDefs();
+    // === PRÉCHARGER LE SON IMMÉDIATEMENT ===
+    preloadRouletteSound();
+
+    saveOriginalPositions();
+    reorganizeZOrder();
+    createFillArc();
 
     // 3. Sauvegarder les positions originales AVANT de réorganiser
     saveOriginalPositions();
