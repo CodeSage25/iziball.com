@@ -878,7 +878,7 @@ main {
 
   .jackpot-img {
     margin-top: 0; /* ANNULE le -50px desktop */
-    margin-right: 0; /* ANNULE le -12px desktop */
+    margin-right: -12px; /* ANNULE le -12px desktop */
     width: 100%;
     height: auto;
     display: block;
@@ -1006,7 +1006,7 @@ main {
 
   .jackpot-img {
     margin-top: 0;
-    margin-right: 0;
+    margin-right: -12px;
     width: 100%;
     height: auto;
   }
@@ -1060,7 +1060,7 @@ main {
   .jackpot-img {
     width: 100%;
     margin-top: 0;
-    margin-right: 0;
+    margin-right: -12px;
     height: auto;
     /* Hauteur minimale pour que le header occupe bien le haut */
     min-height: 72px;
@@ -1137,7 +1137,7 @@ main {
   .jackpot-img {
     width: 100%;
     margin-top: 0;
-    margin-right: 0;
+    margin-right: -12px;
     min-height: 60px;
   }
 
