@@ -103,12 +103,12 @@
   // ===== CONFIGURATION =====
   var CONFIG = {
     // Durées (ms)
-    FILL_DURATION: 20000, // durée du remplissage (20 secondes)
+    FILL_DURATION: 20000, // durée du remplissage (30 secondes)
     SPIN_DURATION: 7500, // durée de la rotation
-    GLOW_DURATION: 3000, // durée de la lueur gagnante
-    PAUSE_AFTER_FILL: 200, // pause entre remplissage et rotation
+    GLOW_DURATION: 2000, // durée de la lueur gagnante
+    PAUSE_AFTER_FILL: 5, // pause entre remplissage et rotation
     FADE_OUT_FILL: 500, // durée du fondu de disparition du remplissage
-    AUTO_SPIN_INTERVAL: 1400, // intervalle entre tours auto
+    AUTO_SPIN_INTERVAL: 10, // intervalle entre tours auto
     FIRST_SPIN_DELAY: 1500, // délai avant le premier tour
 
     // Géométrie du demi-cercle (tirée du SVG original)
@@ -1717,24 +1717,48 @@
     var chipEl;
 
     if (existing && existing.chipEl) {
-      // Mettre à jour l'élément existant
       chipEl = existing.chipEl;
+
+      // Compter les images déjà empilées
+      var currentImgs = chipEl.querySelectorAll(".table-chip-img");
+      var stackIndex = currentImgs.length; // index du nouveau jeton
+
+      // Créer le nouveau jeton empilé
+      var newImg = document.createElement("img");
+      newImg.src = chipImgSrc;
+      newImg.className = "table-chip-img";
+      newImg.alt = "";
+      newImg.style.bottom = Math.min(stackIndex, 5) * 5 + "px";
+      newImg.style.zIndex = stackIndex + 1;
+
+      // Insérer avant le label montant
       var amountLabel = chipEl.querySelector(".chip-amount");
-      if (amountLabel)
+      chipEl.insertBefore(newImg, amountLabel);
+
+      // Agrandir le conteneur vers le haut
+      // chipEl.style.minHeight = stackIndex * 9 + 54 + "px";
+
+      // Mettre à jour le montant
+      if (amountLabel) {
         amountLabel.textContent = totalAmount.toLocaleString() + " FCFA";
-      // Animation de "bump" pour montrer l'ajout
+      }
+
+      // Animation bump
       chipEl.classList.remove("chip-bump");
       void chipEl.offsetWidth;
       chipEl.classList.add("chip-bump");
     } else {
-      // Créer un nouvel élément de jeton
+      // Premier jeton sur cette case
       chipEl = document.createElement("div");
       chipEl.className = "table-chip";
+      chipEl.style.minHeight = "54px";
 
       var img = document.createElement("img");
       img.src = chipImgSrc;
       img.className = "table-chip-img";
       img.alt = totalAmount.toString();
+      img.style.bottom = "0px";
+      img.style.zIndex = "1";
       chipEl.appendChild(img);
 
       var label = document.createElement("span");
@@ -1742,7 +1766,6 @@
       label.textContent = totalAmount.toLocaleString() + " FCFA";
       chipEl.appendChild(label);
 
-      // Positionner sur la cellule
       cell.style.position = "relative";
       cell.appendChild(chipEl);
 
