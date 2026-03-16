@@ -587,7 +587,7 @@ main {
     background-color: transparent;
   }
   10% {
-    box-shadow: inset 0 0 40px 12px rgba(255, 240, 100, 1);
+    box-shadow: inset 0 0 40px 12px #fafafa;
     background-color: rgba(255, 240, 100, 0.25);
   }
   25% {
@@ -595,7 +595,7 @@ main {
     background-color: transparent;
   }
   40% {
-    box-shadow: inset 0 0 40px 12px rgba(255, 240, 100, 1);
+    box-shadow: inset 0 0 40px 12px #fafafa;
     background-color: rgba(255, 240, 100, 0.25);
   }
   55% {
@@ -603,11 +603,11 @@ main {
     background-color: transparent;
   }
   70% {
-    box-shadow: inset 0 0 35px 10px rgba(255, 240, 100, 0.85);
+    box-shadow: inset 0 0 35px 10px #fafafa;
     background-color: rgba(255, 240, 100, 0.2);
   }
   100% {
-    box-shadow: inset 0 0 20px 6px rgba(255, 240, 100, 0.5);
+    box-shadow: inset 0 0 20px 6px #fafafa;
     background-color: transparent;
   }
 }
