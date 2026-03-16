@@ -835,9 +835,13 @@ main {
   .desktop-text {
     display: none;
   }
+  .historique h2 {
+    display: none;
+  }
   .mobile-text {
-    display: block;
+    display: none;
     font-size: 1.5rem;
+    border-bottom: 0px;
   }
 
   .historique-id {
@@ -877,7 +881,7 @@ main {
   }
 
   .jackpot-img {
-    margin-top: 0; /* ANNULE le -50px desktop */
+    margin-top: -50px; /* ANNULE le -50px desktop */
     margin-right: -12px; /* ANNULE le -12px desktop */
     width: 100%;
     height: auto;
@@ -919,7 +923,7 @@ main {
   ------------------------------------------------- */
   .section-bottom {
     width: calc(100% - 10px);
-    margin: 6px auto 80px auto;
+    margin: 0px auto 70px auto;
     padding: 5px;
   }
 
@@ -1005,7 +1009,7 @@ main {
   }
 
   .jackpot-img {
-    margin-top: 0;
+    margin-top: -40px;
     margin-right: -12px;
     width: 100%;
     height: auto;
@@ -1035,7 +1039,7 @@ main {
   /* Section bottom : conserver tel quel (≤700px déjà OK) */
   .section-bottom {
     width: calc(100% - 10px);
-    margin-bottom: 80px;
+    margin-bottom: 70px;
   }
 
   .cell-num {
@@ -1059,7 +1063,7 @@ main {
 
   .jackpot-img {
     width: 100%;
-    margin-top: 0;
+    margin-top: -40px;
     margin-right: -12px;
     height: auto;
     /* Hauteur minimale pour que le header occupe bien le haut */
@@ -1136,7 +1140,7 @@ main {
   /* Header : maintenir la présence en haut de page */
   .jackpot-img {
     width: 100%;
-    margin-top: 0;
+    margin-top: -30px;
     margin-right: -12px;
     min-height: 60px;
   }

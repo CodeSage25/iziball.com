@@ -532,6 +532,7 @@
     refs.fillArcEl.setAttribute("fill", "rgb(143, 155, 16");
     refs.fillArcEl.setAttribute("opacity", "0");
     refs.fillArcEl.setAttribute("d", "");
+    refs.fillArcEl.setAttribute("clip-path", "url(#arc-bottom-clip)");
 
     // Insérer entre zone-interieure et texte-zebal
     // zone-interieure est déjà juste avant texte-zebal grâce à reorganizeZOrder()
@@ -573,7 +574,7 @@
     // On utilise les mêmes dimensions pour que le remplissage couvre exactement la zone
     var fillCX = 155.67;
     var fillCY = 184.41; // bas de la zone — le camembert part d'ici
-    var fillRadius = 115; // agrandi pour atteindre le sommet de l'arc (184.41 - 69.41 = 115)
+    var fillRadius = 115; // assez grand pour atteindre le sommet de l'arc
 
     // L'arc part de la DROITE (angle 0°) et va vers la GAUCHE (angle 180°)
     // À progress=0 : rien n'est rempli
