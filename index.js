@@ -103,12 +103,12 @@
   // ===== CONFIGURATION =====
   var CONFIG = {
     // Durées (ms)
-    FILL_DURATION: 20000, // durée du remplissage (30 secondes)
+    FILL_DURATION: 30000, // durée du remplissage (30 secondes)
     SPIN_DURATION: 7500, // durée de la rotation
     GLOW_DURATION: 2000, // durée de la lueur gagnante
-    PAUSE_AFTER_FILL: 5, // pause entre remplissage et rotation
+    PAUSE_AFTER_FILL: 1, // pause entre remplissage et rotation
     FADE_OUT_FILL: 500, // durée du fondu de disparition du remplissage
-    AUTO_SPIN_INTERVAL: 10, // intervalle entre tours auto
+    AUTO_SPIN_INTERVAL: 5, // intervalle entre tours auto
     FIRST_SPIN_DELAY: 1500, // délai avant le premier tour
 
     // Géométrie du demi-cercle (tirée du SVG original)
