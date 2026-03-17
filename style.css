@@ -128,10 +128,7 @@ main {
   height: auto;
   margin: 0 auto;
   margin-top: -50px;
-  /* filter: drop-shadow(0 0 12px rgba(255, 200, 50, 0.5)); */
-
   margin-right: -12px;
-  /* display: block; */
 }
 
 /* ========================================
@@ -145,9 +142,6 @@ main {
   justify-content: center;
   align-items: center;
   min-height: 200px;
-  /* margin-left: 20px;
-  margin-right: 20px; */
-  /* margin-top: -5px; */
 }
 
 .middle-bg {
@@ -189,7 +183,6 @@ main {
 
 .table-outer-border {
   border: 1px solid #ffffff;
-  /* border-radius: 10px; */
   overflow: hidden;
 }
 
@@ -204,8 +197,6 @@ main {
   border: 1px solid #ffffff;
   text-align: center;
   vertical-align: middle;
-  /* padding: 8px 4px; */
-  /* cursor: pointer; */
   transition: background 0.15s;
 }
 
@@ -255,7 +246,6 @@ main {
 
 .table-outer-border table tr:last-child td {
   padding: 14px 6px;
-  /* font-size: 0.9rem; */
   font-weight: 700;
   letter-spacing: 1px;
   background: #003d1e;
@@ -666,9 +656,8 @@ main {
   transition:
     opacity 0.3s ease,
     transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-  /* AJOUT : contenir l'empilement dans la case */
+  /*contenir l'empilement dans la case */
   max-height: calc(100% - 8px);
-  /* overflow: hidden; */
 }
 .table-chip.chip-visible {
   opacity: 1;
@@ -884,10 +873,7 @@ main {
     padding-bottom: 0px;
   }
 
-  /* --- HEADER ---
-     CORRECTIF CLÉ : annule les marges négatives desktop
-     qui provoquent le chevauchement avec section-middle
-  ------------------------------------------------- */
+  /* --- HEADER ---------------------------------------------------- */
   .main-header {
     padding: 0;
     width: 100%;
@@ -900,17 +886,14 @@ main {
   }
 
   .jackpot-img {
-    margin-top: -50px; /* ANNULE le -50px desktop */
-    margin-right: -12px; /* ANNULE le -12px desktop */
+    margin-top: -50px;
+    margin-right: -12px;
     width: 100%;
     height: auto;
     display: block;
   }
 
-  /* --- SECTION MIDDLE ---
-     CORRECTIF CLÉ : annule le margin-top: 80px du logo
-     et aligne la largeur sur section-bottom
-  ------------------------------------------------- */
+  /* --- SECTION MIDDLE ---------------------------------------------------- */
   .section-middle {
     width: 100%;
     min-height: unset;
@@ -925,21 +908,19 @@ main {
   }
 
   .middle-bg {
-    top: 0; /* ANNULE le -10px desktop */
+    top: 0;
     height: 85%;
   }
 
   /* RÈGLE PRINCIPALE : même largeur que .section-bottom */
   .middle-logo {
     width: calc(100% - 10px); /* = section-bottom width */
-    margin-top: 0; /* ANNULE le 80px desktop */
+    margin-top: 0;
     max-width: none;
     overflow: visible;
   }
 
-  /* --- SECTION BOTTOM ---
-     Légèrement moins aplati qu'avant
-  ------------------------------------------------- */
+  /* --- SECTION BOTTOM ---------------------------------------------------- */
   .section-bottom {
     width: calc(100% - 10px);
     margin: 0px auto 70px auto;
@@ -1021,7 +1002,6 @@ main {
    RESPONSIVE ≤ 490px
    ======================================== */
 @media (max-width: 490px) {
-  /* Header : taille correcte, on maintient son comportement */
   .main-header {
     height: auto;
     min-height: unset;
@@ -1034,8 +1014,6 @@ main {
     height: auto;
   }
 
-  /* Section middle : le logo est un peu trop grand,
-     on le contient dans son espace sans déborder */
   .section-middle {
     height: auto;
     min-height: unset;
@@ -1055,7 +1033,6 @@ main {
     overflow: visible;
   }
 
-  /* Section bottom : conserver tel quel (≤700px déjà OK) */
   .section-bottom {
     width: calc(100% - 10px);
     margin-bottom: 70px;
@@ -1071,9 +1048,6 @@ main {
    RESPONSIVE ≤ 440px
    ======================================== */
 @media (max-width: 440px) {
-  /* Header : le SVG doit rester en haut et ne pas rétrécir
-     On fixe une hauteur minimale pour l'ancrer
-  ------------------------------------------------- */
   .main-header {
     height: auto;
     min-height: unset;
@@ -1085,12 +1059,10 @@ main {
     margin-top: -40px;
     margin-right: -12px;
     height: auto;
-    /* Hauteur minimale pour que le header occupe bien le haut */
     min-height: 72px;
     flex-shrink: 0;
   }
 
-  /* Section middle */
   .section-middle {
     height: auto;
     min-height: unset;
@@ -1109,7 +1081,6 @@ main {
     overflow: visible;
   }
 
-  /* Légère réduction du tableau */
   .cell-num {
     font-size: 1.75rem;
     height: 40px;
@@ -1156,7 +1127,6 @@ main {
    RESPONSIVE ≤ 350px
    ======================================== */
 @media (max-width: 350px) {
-  /* Header : maintenir la présence en haut de page */
   .jackpot-img {
     width: 100%;
     margin-top: -30px;
@@ -1164,7 +1134,6 @@ main {
     min-height: 60px;
   }
 
-  /* RÈGLE PRINCIPALE : même largeur que .section-bottom */
   .middle-logo {
     width: calc(100% - 10px);
     margin-top: 0;
@@ -1174,7 +1143,6 @@ main {
     height: 70%;
   }
 
-  /* Réductions fines du tableau */
   .cell-num {
     font-size: 1.5rem;
     height: 36px;
